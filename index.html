@@ -1,0 +1,2764 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>e-Laporan Guru Bertugas Mingguan - SK Seri Chantek</title>
+
+    <!-- Konfigurasi PWA (iOS Safari & Android Chrome) -->
+    <meta name="application-name" content="e-Laporan SKSC">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="e-Laporan SKSC">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#14532d">
+    <meta name="description" content="Sistem e-Laporan Guru Bertugas Mingguan (3K, Keselamatan & RMT) - Sekolah Kebangsaan Seri Chantek">
+    <link id="pwa-manifest-link" rel="manifest" href="">
+    <link id="apple-touch-icon-link" rel="apple-touch-icon" sizes="180x180" href="">
+    <link id="pwa-favicon-link" rel="icon" type="image/png" href="">
+
+    <!-- Muat turun Tailwind CSS & Google Fonts (Inter) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        skGreen: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            600: '#15803d',
+                            700: '#166534',
+                            800: '#14532d',
+                            900: '#052e16',
+                        },
+                        skGold: {
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            -webkit-tap-highlight-color: transparent;
+            padding-top: env(safe-area-inset-top);
+        }
+
+        /* Sokongan Safe Area iOS pada bar navigasi bawah */
+        .safe-bottom-nav {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Gaya Khas Cetakan PDF Rasmi */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 12mm 14mm;
+            }
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                font-size: 10.5pt !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            #print-report-container {
+                display: block !important;
+                width: 100% !important;
+            }
+            .print-section {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            table.print-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 6px;
+                margin-bottom: 12px;
+            }
+            table.print-table th,
+            table.print-table td {
+                border: 1px solid #334155;
+                padding: 5px 8px;
+                text-align: left;
+                font-size: 9pt;
+                vertical-align: top;
+            }
+            table.print-table th {
+                background-color: #f1f5f9 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                font-weight: 700;
+            }
+        }
+
+        /* Animasi Toast & Transisi */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-toast {
+            animation: slideUp 0.25s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col pb-24 md:pb-10">
+
+    <!-- ==================== HEADER UTAMA APLIKASI (NO PRINT) ==================== -->
+    <header id="main-app-header" class="no-print sticky top-0 z-40 bg-gradient-to-r from-skGreen-900 via-skGreen-800 to-emerald-800 text-white shadow-lg border-b-4 border-skGold-500 transition-colors duration-300">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+            <!-- Identiti & Lencana SK Seri Chantek -->
+            <div class="flex items-center gap-3 min-w-0">
+                <div id="header-logo-wrapper" class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/10 backdrop-blur border border-white/20 p-1 flex items-center justify-center shrink-0 shadow-inner">
+                    <!-- Lencana Rasmi S.K. Seri Chantek (SVG Beresolusi Tinggi) -->
+                    <svg class="w-full h-full drop-shadow" viewBox="0 0 200 215" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Lencana S.K. Seri Chantek">
+                        <defs>
+                            <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#FDE047"/>
+                                <stop offset="100%" stop-color="#CA8A04"/>
+                            </linearGradient>
+                            <linearGradient id="greenGrad" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#16A34A"/>
+                                <stop offset="100%" stop-color="#14532D"/>
+                            </linearGradient>
+                            <linearGradient id="flameGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#EF4444"/>
+                                <stop offset="100%" stop-color="#991B1B"/>
+                            </linearGradient>
+                            <clipPath id="shieldClip">
+                                <path d="M100 12 C125 26 155 28 172 28 L172 105 C172 148 138 174 100 190 C62 174 28 148 28 105 L28 28 C45 28 75 26 100 12 Z"/>
+                            </clipPath>
+                        </defs>
+                        <!-- Perisai Utama -->
+                        <g clip-path="url(#shieldClip)">
+                            <rect x="20" y="10" width="80" height="85" fill="url(#goldGrad)"/>
+                            <rect x="100" y="10" width="80" height="85" fill="url(#greenGrad)"/>
+                            <rect x="20" y="95" width="80" height="100" fill="url(#greenGrad)"/>
+                            <rect x="100" y="95" width="80" height="100" fill="url(#goldGrad)"/>
+                            <line x1="100" y1="10" x2="100" y2="195" stroke="#FEF08A" stroke-width="2.5"/>
+                            <line x1="25" y1="95" x2="175" y2="95" stroke="#FEF08A" stroke-width="2.5"/>
+                        </g>
+                        <!-- Bingkai Emas Perisai -->
+                        <path d="M100 12 C125 26 155 28 172 28 L172 105 C172 148 138 174 100 190 C62 174 28 148 28 105 L28 28 C45 28 75 26 100 12 Z" stroke="#FDE047" stroke-width="4" fill="none"/>
+                        <!-- Suku Kiri: Obor Merah Menyala -->
+                        <path d="M62 24 C74 38 78 52 72 64 C66 72 52 72 48 62 C44 50 54 36 62 24 Z" fill="url(#flameGrad)" stroke="#FFF" stroke-width="1.2"/>
+                        <path d="M62 42 C67 49 68 56 64 62 C60 65 55 64 54 58 C53 52 58 46 62 42 Z" fill="#1E293B"/>
+                        <rect x="47" y="64" width="30" height="6" rx="3" fill="#15803D" stroke="#FDE047" stroke-width="1"/>
+                        <polygon points="51,70 73,70 67,138 57,138" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.2"/>
+                        <!-- Suku Kanan Atas: Skrol & Reben Merah -->
+                        <rect x="112" y="47" width="48" height="12" rx="4" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.2"/>
+                        <polygon points="136,53 123,41 123,65" fill="#DC2626"/>
+                        <polygon points="136,53 149,41 149,65" fill="#DC2626"/>
+                        <polygon points="134,55 125,73 132,73" fill="#B91C1C"/>
+                        <polygon points="138,55 147,73 140,73" fill="#B91C1C"/>
+                        <rect x="132" y="47" width="8" height="12" rx="2" fill="#EF4444"/>
+                        <!-- Suku Kanan Bawah: Dua Pensel, Buku Terbuka & 1953 -->
+                        <polygon points="122,102 126,93 130,102 130,115 122,115" fill="#F8FAFC" stroke="#64748B" stroke-width="1"/>
+                        <polygon points="144,102 148,93 152,102 152,115 144,115" fill="#F8FAFC" stroke="#64748B" stroke-width="1"/>
+                        <path d="M111 112 L136 115 L136 142 L111 139 Z" fill="#FFFFFF" stroke="#475569" stroke-width="1.2"/>
+                        <path d="M161 112 L136 115 L136 142 L161 139 Z" fill="#FFFFFF" stroke="#475569" stroke-width="1.2"/>
+                        <line x1="116" y1="120" x2="131" y2="122" stroke="#334155" stroke-width="2" stroke-dasharray="3 2"/>
+                        <line x1="116" y1="127" x2="131" y2="129" stroke="#334155" stroke-width="2" stroke-dasharray="3 2"/>
+                        <line x1="141" y1="122" x2="156" y2="120" stroke="#334155" stroke-width="2" stroke-dasharray="3 2"/>
+                        <line x1="141" y1="129" x2="156" y2="127" stroke="#334155" stroke-width="2" stroke-dasharray="3 2"/>
+                        <rect x="115" y="141" width="42" height="13" rx="3" fill="#F8FAFC" stroke="#CA8A04" stroke-width="1.2"/>
+                        <text x="136" y="151" text-anchor="middle" font-size="9.5" font-weight="800" fill="#0F172A">1953</text>
+                        <!-- Skrol Cogan Kata: HIDUP BERBAKTI -->
+                        <path d="M40 144 Q100 163 160 144 L156 161 Q100 179 44 161 Z" fill="#FFFFFF" stroke="#CA8A04" stroke-width="1.5"/>
+                        <text x="100" y="160" text-anchor="middle" font-size="8.2" font-weight="800" fill="#0F172A" letter-spacing="0.4">HIDUP BERBAKTI</text>
+                        <!-- Skrol Bawah: BP | S.K. SERI CHANTEK | JOH -->
+                        <polygon points="10,174 34,174 34,190 14,190 20,182" fill="#F1F5F9" stroke="#CA8A04" stroke-width="1.3"/>
+                        <text x="23" y="185" text-anchor="middle" font-size="8.5" font-weight="800" fill="#0F172A">BP</text>
+                        <polygon points="190,174 166,174 166,190 186,190 180,182" fill="#F1F5F9" stroke="#CA8A04" stroke-width="1.3"/>
+                        <text x="177" y="185" text-anchor="middle" font-size="8" font-weight="800" fill="#0F172A">JOH</text>
+                        <path d="M30 180 Q100 198 170 180 L166 202 Q100 218 34 202 Z" fill="#FFFFFF" stroke="#CA8A04" stroke-width="1.8"/>
+                        <text x="100" y="201" text-anchor="middle" font-size="11.2" font-weight="900" fill="#0F172A" letter-spacing="0.3">S.K. SERI CHANTEK</text>
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h1 id="header-app-title" class="text-sm sm:text-lg font-extrabold tracking-tight truncate">e-Laporan Guru Bertugas</h1>
+                        <span id="header-app-badge" class="text-[10px] sm:text-xs font-bold uppercase px-2 py-0.5 rounded-full bg-skGold-500 text-slate-950">3K • Keselamatan • RMT</span>
+                        <span id="role-status-pill" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-white/15 border border-white/25 text-emerald-100">Mod Guru</span>
+                    </div>
+                    <p id="header-school-subtitle" class="text-xs text-emerald-200 font-semibold truncate mt-0.5">SEKOLAH KEBANGSAAN SERI CHANTEK • Batu Pahat, Johor (1953)</p>
+                </div>
+            </div>
+            <!-- Butang Tindakan Pantas Header (Suis Mod Guru / Mod Admin & Pasang PWA) -->
+            <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <button type="button" id="btn-install-pwa" onclick="triggerPwaInstall()" title="Pasang Aplikasi ke Skrin Utama (iOS & Android)" class="px-2.5 sm:px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold flex items-center gap-1.5 shadow transition">
+                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/><path d="M12 7v6"/><polyline points="9 10 12 13 15 10"/></svg>
+                    <span class="hidden sm:inline">Pasang App</span>
+                </button>
+                <button type="button" id="btn-toggle-role" onclick="handleRoleSwitchClick()" title="Tukar Mod Guru / Mod Admin" class="px-2.5 sm:px-3 py-2 rounded-xl bg-slate-950/40 hover:bg-slate-950/60 border border-white/25 text-white text-xs font-extrabold flex items-center gap-1.5 transition">
+                    <span id="role-icon">🔐</span>
+                    <span id="role-btn-label">Mod Admin</span>
+                </button>
+                <button type="button" onclick="refreshSystem()" title="Muat Semula Sistem" class="p-2.5 sm:px-3 sm:py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold flex items-center gap-1.5 transition">
+                    <svg id="refresh-icon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+                    <span class="hidden lg:inline">Muat Semula</span>
+                </button>
+                <button type="button" id="btn-admin-editor" onclick="openAdminEditorModal()" title="Panel Suntingan Paparan Admin" class="hidden p-2.5 sm:px-3 sm:py-2 rounded-xl bg-skGold-500 hover:bg-skGold-400 text-slate-950 text-xs font-extrabold items-center gap-1.5 shadow transition">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                    <span class="hidden sm:inline">Edit Paparan</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bar Konteks Minggu & Ketua Bertugas -->
+        <div class="bg-black/25 border-t border-white/10">
+            <div class="max-w-6xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div class="flex items-center gap-2">
+                    <label for="global-week-selector" class="text-emerald-200 font-semibold">Minggu Aktif:</label>
+                    <select id="global-week-selector" onchange="onGlobalWeekChange(this.value)" class="bg-white/15 border border-white/25 text-white font-bold rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-skGold-400">
+                        <!-- Diisi oleh JS -->
+                    </select>
+                    <span class="hidden sm:inline-block text-emerald-200/80">|</span>
+                    <span class="text-emerald-100 truncate max-w-[200px] sm:max-w-xs">Ketua: <strong id="bar-ketua-name" class="text-skGold-400">Belum dipilih</strong></span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 rounded-md bg-white/10 text-emerald-100 font-medium">Rekod Disimpan: <strong id="header-record-count" class="text-white">0</strong></span>
+                    <button type="button" onclick="switchTab('arkib')" id="drive-connection-badge" class="px-2.5 py-0.5 rounded-md bg-emerald-500/30 border border-emerald-300/40 text-emerald-100 font-semibold hover:bg-emerald-500/40 transition">
+                        Drive Rasmi SKSC Disambung
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bar Alat Pantas Mod Admin (Hanya Muncul Dalam Mod Admin) -->
+        <div id="admin-quick-toolbar" class="hidden bg-amber-400 text-slate-950 border-t border-amber-500">
+            <div class="max-w-6xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div class="flex items-center gap-2 font-extrabold">
+                    <span class="px-2 py-0.5 rounded bg-slate-950 text-amber-300 text-[10px] uppercase">Mod Admin Aktif</span>
+                    <span>Anda mempunyai akses penuh untuk menyunting paparan, senarai guru/kelas &amp; pengesahan laporan.</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="openAdminEditorModal()" class="px-3 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 text-white font-bold transition">
+                        ⚙️ Edit Paparan &amp; Tetapan
+                    </button>
+                    <button type="button" onclick="switchToGuruMode()" class="px-3 py-1 rounded-lg bg-white/80 hover:bg-white text-slate-950 font-bold border border-slate-900/20 transition">
+                        Keluar Mod Admin
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigasi Tab Desktop (5 Modul) -->
+        <nav class="hidden md:block bg-white text-slate-700 border-b border-slate-200">
+            <div class="max-w-6xl mx-auto px-4 flex items-center gap-1">
+                <button type="button" data-tab="harian" onclick="switchTab('harian')" class="nav-tab-desktop px-4 py-3 text-sm font-bold border-b-2 border-skGreen-700 text-skGreen-800 flex items-center gap-2 transition">
+                    <span>1. Laporan Harian</span>
+                </button>
+                <button type="button" data-tab="keceriaan" onclick="switchTab('keceriaan')" class="nav-tab-desktop px-4 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2 transition">
+                    <span>2. Keceriaan Kelas</span>
+                </button>
+                <button type="button" data-tab="keselamatan" onclick="switchTab('keselamatan')" class="nav-tab-desktop px-4 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2 transition">
+                    <span>3. Keselamatan 3K</span>
+                </button>
+                <button type="button" data-tab="rmt" onclick="switchTab('rmt')" class="nav-tab-desktop px-4 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2 transition">
+                    <span>4. Program RMT</span>
+                </button>
+                <button type="button" data-tab="arkib" onclick="switchTab('arkib')" class="nav-tab-desktop px-4 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2 transition">
+                    <span>5. Arkib &amp; Google Drive</span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ==================== KANDUNGAN UTAMA APLIKASI (NO PRINT) ==================== -->
+    <main class="no-print flex-1 max-w-6xl w-full mx-auto px-4 pt-5 space-y-6">
+
+        <!-- Banner Pengumuman Pentadbir (Boleh Disunting Oleh Mod Admin) -->
+        <div id="admin-announcement-banner" class="hidden bg-gradient-to-r from-amber-50 to-yellow-50 border-l-4 border-amber-500 rounded-2xl p-4 shadow-sm flex items-start justify-between gap-3">
+            <div class="flex items-start gap-3">
+                <span class="text-xl leading-none mt-0.5">📢</span>
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-800">Makluman Pentadbir / Guru Besar</span>
+                    <p id="admin-announcement-text" class="text-xs sm:text-sm font-bold text-slate-800 mt-0.5"></p>
+                </div>
+            </div>
+            <button type="button" onclick="openAdminEditorModal()" class="admin-only-control hidden text-[11px] font-extrabold text-amber-900 underline shrink-0">Edit</button>
+        </div>
+
+        <!-- ==================== TAB 1: LAPORAN HARIAN & PERHIMPUNAN ==================== -->
+        <section id="tab-harian" class="tab-panel space-y-5">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6 space-y-5">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                    <div>
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-skGreen-700 bg-skGreen-50 px-2.5 py-1 rounded-lg">Modul 1 • Perhimpunan &amp; Disiplin</span>
+                        <h2 id="title-modul-1" class="text-lg sm:text-xl font-extrabold text-slate-900 mt-1.5">Laporan Harian Guru Bertugas Mingguan</h2>
+                    </div>
+                    <button type="button" onclick="resetHarianForm()" class="text-xs font-semibold text-slate-500 hover:text-rose-600 px-3 py-2 rounded-xl border border-slate-200 hover:border-rose-200 transition">
+                        Set Semula Borang
+                    </button>
+                </div>
+
+                <!-- Baris 1: Minggu, Tarikh, Hari -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label for="harian-minggu" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Minggu Persekolahan</label>
+                        <select id="harian-minggu" onchange="onFormWeekChange(this.value)" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-skGreen-600 focus:outline-none">
+                            <!-- Diisi JS -->
+                        </select>
+                    </div>
+                    <div>
+                        <label for="harian-tarikh" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Tarikh Laporan</label>
+                        <input type="date" id="harian-tarikh" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-skGreen-600 focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="harian-hari" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Hari Persekolahan</label>
+                        <select id="harian-hari" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-skGreen-600 focus:outline-none">
+                            <option value="Isnin">Isnin (Perhimpunan Rasmi)</option>
+                            <option value="Selasa">Selasa</option>
+                            <option value="Rabu">Rabu</option>
+                            <option value="Khamis">Khamis</option>
+                            <option value="Jumaat">Jumaat</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Baris 2: Pemilihan Ketua & Ahli Guru Bertugas SK Seri Chantek -->
+                <div class="bg-skGreen-50/70 border border-skGreen-200 rounded-2xl p-4 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="harian-ketua-select" class="block text-xs font-bold text-skGreen-900 uppercase mb-1.5">Ketua Guru Bertugas Mingguan</label>
+                            <select id="harian-ketua-select" onchange="handleKetuaSelectChange(this.value)" class="w-full rounded-xl border border-skGreen-300 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-skGreen-600 focus:outline-none">
+                                <!-- Diisi JS dengan 19 guru SK Seri Chantek -->
+                            </select>
+                            <input type="text" id="harian-ketua-manual" placeholder="Taip nama Ketua Guru Bertugas..." class="hidden mt-2 w-full rounded-xl border border-skGreen-300 bg-white px-3.5 py-2 text-sm focus:ring-2 focus:ring-skGreen-600 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label for="harian-ahli" class="block text-xs font-bold text-skGreen-900 uppercase">Ahli Guru Bertugas Mingguan</label>
+                                <button type="button" onclick="clearSelectedAhli()" class="text-[11px] font-bold text-rose-600 hover:underline">Kosongkan Pilihan</button>
+                            </div>
+                            <input type="text" id="harian-ahli" oninput="syncAhliChipsFromInput()" placeholder="Klik cip nama guru di bawah atau taip manual..." class="w-full rounded-xl border border-skGreen-300 bg-white px-3.5 py-2.5 text-sm font-medium focus:ring-2 focus:ring-skGreen-600 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Cip Nama 19 Guru SK Seri Chantek -->
+                    <div>
+                        <p class="text-[11px] font-bold text-skGreen-800 mb-2">Pilih Pantas Ahli Guru Bertugas (Senarai Rasmi 19 Guru SK Seri Chantek):</p>
+                        <div id="ahli-teacher-chips" class="flex flex-wrap gap-1.5">
+                            <!-- Diisi oleh JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Baris 3: Ucapan Pentadbir & Disiplin -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="harian-ucapan" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Ucapan Pentadbir &amp; Info Perhimpunan</label>
+                        <textarea id="harian-ucapan" rows="4" placeholder="Catat amanat Guru Besar, PK Pentadbiran, PK HEM, PK Kokurikulum atau pengumuman penting perhimpunan..." class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-skGreen-600 focus:outline-none"></textarea>
+                    </div>
+                    <div>
+                        <label for="harian-disiplin" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Laporan Disiplin, Kehadiran &amp; Sahsiah Murid</label>
+                        <textarea id="harian-disiplin" rows="4" placeholder="Catat ketepatan masa murid hadir ke sekolah, pematuhan pakaian seragam, kelakuan di kantin/perhimpunan..." class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-skGreen-600 focus:outline-none"></textarea>
+                    </div>
+                </div>
+
+                <!-- Baris 4: Rekod Kesihatan & Kecemasan Murid (Dinamik) -->
+                <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/70 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <h3 class="text-sm font-extrabold text-slate-800">Rekod Kesihatan &amp; Kecemasan Murid</h3>
+                            <p class="text-xs text-slate-500">Tambah rekod jika terdapat murid sakit, demam, cedera ringan atau dihantar pulang.</p>
+                        </div>
+                        <button type="button" onclick="addHealthRow()" class="bg-skGreen-700 hover:bg-skGreen-800 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm flex items-center gap-1.5 transition">
+                            <span>+ Tambah Murid</span>
+                        </button>
+                    </div>
+                    <div id="health-rows-container" class="space-y-2.5">
+                        <!-- Baris kesihatan diisi JS -->
+                    </div>
+                </div>
+
+                <!-- Butang Simpan -->
+                <div class="flex justify-end pt-2">
+                    <button type="button" onclick="saveHarianRecord()" class="w-full sm:w-auto bg-skGreen-700 hover:bg-skGreen-800 text-white font-extrabold text-sm px-6 py-3.5 rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        <span>Simpan Laporan Harian</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Senarai Rekod Harian Minggu Ini -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3">
+                <h3 class="text-sm font-extrabold text-slate-800 uppercase tracking-wide">Rekod Laporan Harian Disimpan (Minggu Aktif)</h3>
+                <div id="harian-records-list" class="space-y-2.5">
+                    <!-- Diisi JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 2: PEMANTAUAN KECERIAAN KELAS ==================== -->
+        <section id="tab-keceriaan" class="tab-panel hidden space-y-5">
+            <!-- Kad Johan Keceriaan Mingguan Automatik -->
+            <div class="bg-gradient-to-r from-amber-500 via-skGold-500 to-yellow-500 text-slate-950 rounded-2xl p-5 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-950/10 flex items-center justify-center text-2xl shrink-0">🏆</div>
+                    <div>
+                        <span class="text-[11px] font-extrabold uppercase tracking-wider bg-slate-950/15 px-2.5 py-0.5 rounded-full">Keputusan Automatik Mingguan</span>
+                        <h3 class="text-base sm:text-lg font-extrabold mt-1">Johan Keceriaan Kelas: <span id="johan-kelas-name" class="underline">Belum Dinilai</span></h3>
+                        <p id="johan-kelas-detail" class="text-xs font-semibold text-slate-900/80">Sila masukkan penilaian kelas di bawah untuk menentukan pemenang mingguan.</p>
+                    </div>
+                </div>
+                <div class="bg-white/90 px-4 py-2 rounded-xl text-center shrink-0 self-end sm:self-center">
+                    <span class="block text-[10px] font-bold uppercase text-slate-500">Markah Tertinggi</span>
+                    <span id="johan-kelas-score" class="text-xl font-black text-skGreen-800">0%</span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6 space-y-5">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                    <div>
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg">Modul 2 • 3K Kebersihan &amp; Keceriaan</span>
+                        <h2 id="title-modul-2" class="text-lg sm:text-xl font-extrabold text-slate-900 mt-1.5">Penilaian Kebersihan &amp; Keceriaan Bilik Darjah</h2>
+                    </div>
+                    <button type="button" onclick="resetKeceriaanForm()" class="text-xs font-semibold text-slate-500 hover:text-rose-600 px-3 py-2 rounded-xl border border-slate-200 transition">
+                        Set Semula Borang
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label for="keceriaan-kelas-select" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Nama Kelas (SK Seri Chantek)</label>
+                        <select id="keceriaan-kelas-select" onchange="handleKeceriaanKelasSelect(this.value)" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-skGreen-600 focus:outline-none">
+                            <!-- Diisi secara dinamik oleh renderKeceriaanClassOptions() -->
+                        </select>
+                        <input type="text" id="keceriaan-kelas-manual" placeholder="Taip nama kelas..." class="hidden mt-2 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold focus:ring-2 focus:ring-skGreen-600 focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="keceriaan-tarikh" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Tarikh Pemantauan</label>
+                        <input type="date" id="keceriaan-tarikh" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-skGreen-600 focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="keceriaan-penilai" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Guru Penilai</label>
+                        <input type="text" id="keceriaan-penilai" list="teacher-datalist" placeholder="Pilih atau taip nama guru..." class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-skGreen-600 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Butang Pilih Pantas 10 Kelas Rasmi SK Seri Chantek -->
+                <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-3.5">
+                    <p id="label-kelas-chips" class="text-[11px] font-bold text-emerald-900 mb-2">Pilih Pantas Kelas Rasmi SK Seri Chantek:</p>
+                    <div id="keceriaan-kelas-chips" class="flex flex-wrap gap-1.5">
+                        <!-- Diisi oleh JS -->
+                    </div>
+                </div>
+
+                <!-- 5 Kriteria Skala Bintang 1-5 -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-600">5 Kriteria Penilaian (Skala 1 hingga 5 Bintang)</h3>
+                        <span class="text-sm font-extrabold text-skGreen-800 bg-skGreen-50 px-3 py-1 rounded-xl border border-skGreen-200">
+                            Jumlah: <span id="keceriaan-live-raw">20</span>/25 (<span id="keceriaan-live-pct">80</span>%)
+                        </span>
+                    </div>
+                    <div id="keceriaan-criteria-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Diisi JS -->
+                    </div>
+                </div>
+
+                <!-- Catatan & Gambar Bukti Keceriaan -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="keceriaan-catatan" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Ulasan &amp; Cadangan Penambahbaikan</label>
+                        <textarea id="keceriaan-catatan" rows="3" placeholder="Catat keadaan sudut bacaan, papan kenyataan, susunan meja atau teguran kebersihan..." class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-skGreen-600 focus:outline-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Gambar Bukti Keceriaan (Pilihan)</label>
+                        <label class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 hover:border-skGreen-600 rounded-xl p-3.5 bg-slate-50 cursor-pointer transition">
+                            <span class="text-xs font-bold text-skGreen-700">📷 Ambil Gambar / Muat Naik Foto Kelas</span>
+                            <span class="text-[11px] text-slate-400 mt-0.5">Dimampatkan secara automatik untuk simpanan pantas</span>
+                            <input type="file" accept="image/*" capture="environment" onchange="handleImageUpload(event, 'keceriaan')" class="hidden">
+                        </label>
+                        <div id="keceriaan-photo-preview" class="mt-2 hidden"></div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="button" onclick="saveKeceriaanRecord()" class="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-sm px-6 py-3.5 rounded-xl shadow-md transition">
+                        Simpan Markah Keceriaan Kelas
+                    </button>
+                </div>
+            </div>
+
+            <!-- Kedudukan Kelas Minggu Ini -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3">
+                <h3 class="text-sm font-extrabold text-slate-800 uppercase tracking-wide">Kedudukan Penilaian Kelas (Minggu Aktif)</h3>
+                <div id="keceriaan-records-list" class="space-y-2.5">
+                    <!-- Diisi JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 3: PEMANTAUAN KESELAMATAN SEKOLAH (3K) ==================== -->
+        <section id="tab-keselamatan" class="tab-panel hidden space-y-5">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6 space-y-5">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                    <div>
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg">Modul 3 • 3K Keselamatan Fizikal</span>
+                        <h2 id="title-modul-3" class="text-lg sm:text-xl font-extrabold text-slate-900 mt-1.5">Senarai Semak Keselamatan Kawasan Sekolah</h2>
+                    </div>
+                    <button type="button" onclick="resetKeselamatanForm()" class="text-xs font-semibold text-slate-500 hover:text-rose-600 px-3 py-2 rounded-xl border border-slate-200 transition">
+                        Set Semula Borang
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="keselamatan-tarikh" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Tarikh Pemeriksaan</label>
+                        <input type="date" id="keselamatan-tarikh" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-skGreen-600 focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="keselamatan-pemeriksa" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Pegawai / Guru Pemeriksa</label>
+                        <input type="text" id="keselamatan-pemeriksa" list="teacher-datalist" placeholder="Pilih atau taip nama guru pemeriksa..." class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-skGreen-600 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- 6 Kawasan Kritikal Keselamatan -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Status 6 Kawasan Utama Sekolah</h3>
+                    <div id="keselamatan-zones-list" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                        <!-- Diisi JS -->
+                    </div>
+                </div>
+
+                <!-- Catatan Tindakan & Gambar Bukti Keselamatan -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="keselamatan-catatan" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Laporan Kerosakan / Tindakan Segera Diambil</label>
+                        <textarea id="keselamatan-catatan" rows="3" placeholder="Nyatakan lokasi kerosakan (jika ada), nombor bilik/blok dan tindakan kawalan sementara..." class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-skGreen-600 focus:outline-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Foto Bukti / Kerosakan Fizikal (Pilihan)</label>
+                        <label class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 hover:border-rose-500 rounded-xl p-3.5 bg-slate-50 cursor-pointer transition">
+                            <span class="text-xs font-bold text-rose-700">📷 Tangkap Gambar Kawasan / Kerosakan</span>
+                            <span class="text-[11px] text-slate-400 mt-0.5">Akan dilampirkan dalam laporan PDF &amp; Google Drive</span>
+                            <input type="file" accept="image/*" capture="environment" onchange="handleImageUpload(event, 'keselamatan')" class="hidden">
+                        </label>
+                        <div id="keselamatan-photo-preview" class="mt-2 hidden"></div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="button" onclick="saveKeselamatanRecord()" class="w-full sm:w-auto bg-rose-700 hover:bg-rose-800 text-white font-extrabold text-sm px-6 py-3.5 rounded-xl shadow-md transition">
+                        Simpan Laporan Keselamatan
+                    </button>
+                </div>
+            </div>
+
+            <!-- Rekod Keselamatan Minggu Ini -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3">
+                <h3 class="text-sm font-extrabold text-slate-800 uppercase tracking-wide">Rekod Pemeriksaan Keselamatan (Minggu Aktif)</h3>
+                <div id="keselamatan-records-list" class="space-y-2.5">
+                    <!-- Diisi JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 4: PEMANTAUAN PROGRAM RMT ==================== -->
+        <section id="tab-rmt" class="tab-panel hidden space-y-5">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6 space-y-5">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                    <div>
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-amber-800 bg-amber-100 px-2.5 py-1 rounded-lg">Modul 4 • Rancangan Makanan Tambahan</span>
+                        <h2 id="title-modul-4" class="text-lg sm:text-xl font-extrabold text-slate-900 mt-1.5">Laporan Pemantauan Harian Program RMT</h2>
+                    </div>
+                    <button type="button" onclick="resetRmtForm()" class="text-xs font-semibold text-slate-500 hover:text-rose-600 px-3 py-2 rounded-xl border border-slate-200 transition">
+                        Set Semula Borang
+                    </button>
+                </div>
+
+                <!-- Maklumat Asas & Kehadiran RMT -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label for="rmt-tarikh" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Tarikh Pemantauan</label>
+                        <input type="date" id="rmt-tarikh" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="rmt-waktu" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Sesi / Waktu Makan</label>
+                        <select id="rmt-waktu" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                            <option value="Pagi (Sebelum PdPc - 7:10 Pagi)">Pagi (Sebelum PdPc - 7:10 Pagi)</option>
+                            <option value="Rehat Tahap 1 (9:40 Pagi)">Rehat Tahap 1 (9:40 Pagi)</option>
+                            <option value="Rehat Tahap 2 (10:10 Pagi)">Rehat Tahap 2 (10:10 Pagi)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="rmt-pemantau" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Guru Bertugas Pemantau</label>
+                        <input type="text" id="rmt-pemantau" list="teacher-datalist" placeholder="Pilih atau taip nama guru..." class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Pengiraan Automatik Bilangan Murid RMT -->
+                <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h3 class="text-xs font-extrabold uppercase tracking-wider text-amber-900">Rekod Kehadiran &amp; Agihan Pek Makanan RMT</h3>
+                        <span id="rmt-live-summary" class="text-xs font-extrabold text-amber-950 bg-amber-200/80 px-3 py-1 rounded-xl">
+                            Kehadiran: 0% • Baki Pek: 0
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label for="rmt-layak" class="block text-xs font-bold text-slate-700 mb-1">Bil. Murid Layak RMT</label>
+                            <input type="number" id="rmt-layak" min="0" value="45" oninput="calculateRmtLive()" class="w-full rounded-xl border border-amber-300 bg-white px-3.5 py-2.5 text-sm font-bold focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="rmt-hadir" class="block text-xs font-bold text-slate-700 mb-1">Bil. Hadir &amp; Terima RMT</label>
+                            <input type="number" id="rmt-hadir" min="0" value="43" oninput="calculateRmtLive()" class="w-full rounded-xl border border-amber-300 bg-white px-3.5 py-2.5 text-sm font-bold focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="rmt-ganti" class="block text-xs font-bold text-slate-700 mb-1">Agihan Murid Ganti (Jika Ada)</label>
+                            <input type="text" id="rmt-ganti" placeholder="Contoh: 2 pek diagih kepada murid layak" class="w-full rounded-xl border border-amber-300 bg-white px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menu Harian & Pematuhan Jadual KPM -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label for="rmt-menu" class="block text-xs font-bold text-slate-700 uppercase">Menu Hidangan Hari Ini</label>
+                        <input type="text" id="rmt-menu" placeholder="Contoh: Nasi Lemak, Telur Rebus, Timun & Buah Betik" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            <button type="button" onclick="setRmtMenu('Nasi Lemak, Telur Rebus & Buah')" class="text-[11px] font-semibold bg-slate-100 hover:bg-amber-100 text-slate-700 px-2.5 py-1 rounded-lg transition">Nasi Lemak</button>
+                            <button type="button" onclick="setRmtMenu('Nasi Ayam, Sup Sayur & Buah')" class="text-[11px] font-semibold bg-slate-100 hover:bg-amber-100 text-slate-700 px-2.5 py-1 rounded-lg transition">Nasi Ayam</button>
+                            <button type="button" onclick="setRmtMenu('Bihun Goreng Putih, Ayam & Buah')" class="text-[11px] font-semibold bg-slate-100 hover:bg-amber-100 text-slate-700 px-2.5 py-1 rounded-lg transition">Bihun Goreng</button>
+                            <button type="button" onclick="setRmtMenu('Mee Goreng, Sayur Sawi & Buah')" class="text-[11px] font-semibold bg-slate-100 hover:bg-amber-100 text-slate-700 px-2.5 py-1 rounded-lg transition">Mee Goreng</button>
+                            <button type="button" onclick="setRmtMenu('Bubur Nasi Ayam, Lobak & Buah')" class="text-[11px] font-semibold bg-slate-100 hover:bg-amber-100 text-slate-700 px-2.5 py-1 rounded-lg transition">Bubur Ayam</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="rmt-pematuhan" class="block text-xs font-bold text-slate-700 uppercase mb-2">Pematuhan Jadual Menu KPM</label>
+                        <select id="rmt-pematuhan" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                            <option value="Patuh Jadual KPM">Patuh Jadual Menu KPM</option>
+                            <option value="Tukar Menu (Dengan Kebenaran)">Tukar Menu (Dengan Kebenaran Pentadbir)</option>
+                            <option value="Tidak Patuh Jadual">Tidak Patuh Jadual (Teguran Diberikan)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 5 Kriteria Kualiti & Kebersihan RMT -->
+                <div class="space-y-2.5">
+                    <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Penilaian 5 Kriteria Penyediaan &amp; Kebersihan RMT</h3>
+                    <div id="rmt-criteria-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Diisi JS -->
+                    </div>
+                </div>
+
+                <!-- Catatan & Gambar Bukti RMT -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="rmt-catatan" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Ulasan Kualiti Makanan &amp; Teguran Pengusaha Kantin</label>
+                        <textarea id="rmt-catatan" rows="3" placeholder="Catat masa makanan siap dihidang, suhu makanan, selera murid atau teguran kepada pengusaha..." class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Gambar Hidangan &amp; Murid Makan RMT (Pilihan)</label>
+                        <label class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 hover:border-amber-500 rounded-xl p-3.5 bg-slate-50 cursor-pointer transition">
+                            <span class="text-xs font-bold text-amber-800">📷 Tangkap Gambar Hidangan RMT</span>
+                            <span class="text-[11px] text-slate-400 mt-0.5">Sebagai bukti pemantauan harian &amp; arkib Drive</span>
+                            <input type="file" accept="image/*" capture="environment" onchange="handleImageUpload(event, 'rmt')" class="hidden">
+                        </label>
+                        <div id="rmt-photo-preview" class="mt-2 hidden"></div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="button" onclick="saveRmtRecord()" class="w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-sm px-6 py-3.5 rounded-xl shadow-md transition">
+                        Simpan Laporan Program RMT
+                    </button>
+                </div>
+            </div>
+
+            <!-- Rekod RMT Minggu Ini -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3">
+                <h3 class="text-sm font-extrabold text-slate-800 uppercase tracking-wide">Rekod Pemantauan RMT (Minggu Aktif)</h3>
+                <div id="rmt-records-list" class="space-y-2.5">
+                    <!-- Diisi JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 5: ARKIB, CETAKAN PDF & GOOGLE DRIVE SEKOLAH ==================== -->
+        <section id="tab-arkib" class="tab-panel hidden space-y-5">
+            <!-- Kad Utama Integrasi Google Drive & Google Sheet SK Seri Chantek -->
+            <div class="bg-gradient-to-br from-slate-900 via-skGreen-900 to-emerald-950 text-white rounded-2xl p-5 sm:p-6 shadow-lg border border-emerald-700/50 space-y-4">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div>
+                        <span class="text-[11px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2.5 py-0.5 rounded-full">Simpanan Rasmi Google Drive Sekolah</span>
+                        <h2 class="text-lg sm:text-xl font-extrabold mt-2">Arkib Digital &amp; Google Sheet SK Seri Chantek</h2>
+                        <p class="text-xs text-slate-300 mt-1">Semua laporan harian, markah keceriaan, keselamatan 3K, RMT dan gambar bukti diarkibkan ke folder Google Drive rasmi sekolah.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="https://drive.google.com/drive/folders/15KBs80ThK0oeHX1C6jS_1pQVb-TBKICy?usp=sharing" target="_blank" rel="noopener noreferrer" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs px-4 py-3 rounded-xl shadow flex items-center gap-2 transition">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M7.71 3.5L1.15 15l3.43 6 6.55-11.5L7.71 3.5zm1.72 0l6.56 11.5h6.86L16.29 3.5H9.43zm6.29 12.5H2.58l3.43 5h13.14l-3.43-5z"/></svg>
+                            <span>Buka Folder Drive Sekolah</span>
+                        </a>
+                        <button type="button" onclick="openOfficialSheetInFolder()" class="bg-white/15 hover:bg-white/25 text-white border border-white/25 font-bold text-xs px-4 py-3 rounded-xl flex items-center gap-2 transition">
+                            <svg class="w-4 h-4 text-emerald-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg>
+                            <span>Buka Google Sheet (Dalam Folder)</span>
+                        </button>
+                        <button type="button" onclick="openDriveScriptModal()" class="admin-only-control hidden bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs px-4 py-3 rounded-xl shadow items-center gap-2 transition">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                            <span>Jana Sheet &amp; Sambung Drive</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Kad Status ID Drive & Sheet -->
+                <div class="bg-black/25 border border-white/10 rounded-xl p-3.5 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                    <div>
+                        <span class="text-slate-400 block">Folder ID Google Drive Rasmi:</span>
+                        <code class="text-emerald-300 font-mono font-bold break-all">15KBs80ThK0oeHX1C6jS_1pQVb-TBKICy</code>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Status Google Sheet dalam Folder Drive:</span>
+                        <code id="display-sheet-location" class="text-amber-300 font-mono font-bold break-all">Pangkalan_Data_eLaporan_SK_Seri_Chantek (ID: 1Cmbmn1rVg5ZIFAD_UuOUppVb-Dml5OirCctQkitnvmo)</code>
+                    </div>
+                </div>
+
+                <!-- 4 Butang Tindakan Utama Arkib & Drive -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+                    <button type="button" onclick="sendWeekToGoogleDrive()" class="bg-skGold-500 hover:bg-skGold-400 text-slate-950 font-extrabold text-xs p-3.5 rounded-xl shadow flex items-center justify-center gap-2 transition">
+                        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <span>Hantar ke Google Drive Sekolah</span>
+                    </button>
+                    <button type="button" onclick="printOfficialWeeklyReport()" class="bg-white hover:bg-slate-100 text-slate-900 font-extrabold text-xs p-3.5 rounded-xl shadow flex items-center justify-center gap-2 transition">
+                        <svg class="w-4 h-4 shrink-0 text-skGreen-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                        <span>Cetak / Simpan PDF Rasmi</span>
+                    </button>
+                    <button type="button" onclick="exportWeekToCSV()" class="bg-emerald-700 hover:bg-emerald-600 text-white font-extrabold text-xs p-3.5 rounded-xl border border-emerald-500/40 flex items-center justify-center gap-2 transition">
+                        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+                        <span>Muat Turun CSV (Sheets)</span>
+                    </button>
+                    <button type="button" onclick="exportBackupJSON()" class="bg-white/10 hover:bg-white/20 text-white font-bold text-xs p-3.5 rounded-xl border border-white/20 flex items-center justify-center gap-2 transition">
+                        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span>Sandaran Fail JSON</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ringkasan Statistik Minggu Aktif -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <span class="text-xs font-bold text-slate-500">Laporan Harian</span>
+                    <p id="stat-harian-count" class="text-2xl font-black text-skGreen-800 mt-1">0 Hari</p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <span class="text-xs font-bold text-slate-500">Purata Keceriaan</span>
+                    <p id="stat-keceriaan-avg" class="text-2xl font-black text-emerald-700 mt-1">0%</p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <span class="text-xs font-bold text-slate-500">Isu Keselamatan</span>
+                    <p id="stat-keselamatan-issues" class="text-2xl font-black text-rose-700 mt-1">0 Kes</p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <span class="text-xs font-bold text-slate-500">Purata Kehadiran RMT</span>
+                    <p id="stat-rmt-avg" class="text-2xl font-black text-amber-600 mt-1">0%</p>
+                </div>
+            </div>
+
+            <!-- Ringkasan Keseluruhan Minggu Aktif -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h3 class="text-sm font-extrabold text-slate-800 uppercase tracking-wide">Pratonton Ringkasan Laporan Minggu Aktif</h3>
+                        <span id="week-verification-badge" class="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">Belum Disahkan Pentadbir</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" id="btn-verify-week" onclick="toggleWeekVerification()" class="admin-only-control hidden text-xs font-extrabold bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-1.5 rounded-lg shadow-sm transition">
+                            ✓ Sahkan Laporan Minggu Ini
+                        </button>
+                        <button type="button" onclick="clearCurrentWeekData()" class="admin-only-control hidden text-xs font-bold text-rose-600 hover:bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-200 transition">
+                            Padam Rekod Minggu Ini
+                        </button>
+                    </div>
+                </div>
+                <div id="week-summary-preview" class="space-y-4 text-sm text-slate-700">
+                    <!-- Diisi JS -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ==================== NAVIGASI BAWAH MUDAH ALIH (NO PRINT) ==================== -->
+    <nav class="no-print safe-bottom-nav md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] grid grid-cols-5">
+        <button type="button" data-tab="harian" onclick="switchTab('harian')" class="nav-tab-mobile py-2.5 px-1 flex flex-col items-center justify-center gap-0.5 text-skGreen-800 font-extrabold">
+            <span class="text-base">📋</span>
+            <span class="text-[10px]">Harian</span>
+        </button>
+        <button type="button" data-tab="keceriaan" onclick="switchTab('keceriaan')" class="nav-tab-mobile py-2.5 px-1 flex flex-col items-center justify-center gap-0.5 text-slate-500 font-semibold">
+            <span class="text-base">✨</span>
+            <span class="text-[10px]">Keceriaan</span>
+        </button>
+        <button type="button" data-tab="keselamatan" onclick="switchTab('keselamatan')" class="nav-tab-mobile py-2.5 px-1 flex flex-col items-center justify-center gap-0.5 text-slate-500 font-semibold">
+            <span class="text-base">🛡️</span>
+            <span class="text-[10px]">3K Selamat</span>
+        </button>
+        <button type="button" data-tab="rmt" onclick="switchTab('rmt')" class="nav-tab-mobile py-2.5 px-1 flex flex-col items-center justify-center gap-0.5 text-slate-500 font-semibold">
+            <span class="text-base">🍱</span>
+            <span class="text-[10px]">RMT</span>
+        </button>
+        <button type="button" data-tab="arkib" onclick="switchTab('arkib')" class="nav-tab-mobile py-2.5 px-1 flex flex-col items-center justify-center gap-0.5 text-slate-500 font-semibold">
+            <span class="text-base">☁️</span>
+            <span class="text-[10px]">Drive/PDF</span>
+        </button>
+    </nav>
+
+    <!-- ==================== MODAL LOG MASUK PIN MOD ADMIN (NO PRINT) ==================== -->
+    <div id="modal-admin-login" class="no-print hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span>🔐</span>
+                    <h3 class="font-extrabold text-base">Akses Mod Admin Pentadbir</h3>
+                </div>
+                <button type="button" onclick="closeModal('modal-admin-login')" class="text-white/80 hover:text-white text-xl font-bold leading-none">&times;</button>
+            </div>
+            <div class="p-5 space-y-4">
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Masukkan <strong>PIN Admin</strong> untuk membuka fungsi suntingan paparan, tema warna, senarai guru/kelas, pengesahan laporan mingguan dan tetapan Google Drive.
+                </p>
+                <div>
+                    <label for="admin-pin-input" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">PIN Keselamatan Admin</label>
+                    <input type="password" id="admin-pin-input" maxlength="12" onkeydown="if(event.key==='Enter') verifyAdminLogin()" placeholder="Masukkan PIN (Lalai: 1234)" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-center text-lg font-black tracking-widest focus:ring-2 focus:ring-skGreen-600 focus:outline-none">
+                    <p class="text-[11px] text-slate-400 mt-1.5 text-center">PIN Lalai Sistem: <code class="font-bold text-slate-600">1234</code> (Boleh ditukar dalam Panel Admin)</p>
+                </div>
+                <div class="flex justify-end gap-2 pt-1">
+                    <button type="button" onclick="closeModal('modal-admin-login')" class="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700">Batal</button>
+                    <button type="button" onclick="verifyAdminLogin()" class="px-5 py-2.5 rounded-xl bg-skGreen-700 hover:bg-skGreen-800 text-white text-xs font-extrabold">Buka Mod Admin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL EDITOR PAPARAN & TETAPAN ADMIN (NO PRINT) ==================== -->
+    <div id="modal-school-settings" class="no-print hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider bg-amber-400 text-slate-950 px-2 py-0.5 rounded">Panel Kawalan Mod Admin</span>
+                    <h3 class="font-extrabold text-base mt-1">Editor Paparan Antaramuka, Sekolah &amp; Senarai Rasmi</h3>
+                </div>
+                <button type="button" onclick="closeModal('modal-school-settings')" class="text-white/80 hover:text-white text-xl font-bold leading-none">&times;</button>
+            </div>
+            <div class="p-5 space-y-5 max-h-[82vh] overflow-y-auto">
+                <!-- Bahagian 1: Suntingan Paparan & Tema -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-skGreen-800">1. Suntingan Paparan Utama &amp; Tema Warna</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Tajuk Utama Aplikasi</label>
+                            <input type="text" id="setting-app-title" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Lencana Tag Header</label>
+                            <input type="text" id="setting-app-badge" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Tema Warna Header</label>
+                            <select id="setting-theme-color" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold">
+                                <option value="emerald">Hijau Rasmi SK Seri Chantek (Lalai)</option>
+                                <option value="navy">Biru Diraja Korporat (Navy)</option>
+                                <option value="maroon">Merah Marun Klasik</option>
+                                <option value="slate">Kelabu Gelap Moden</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Tukar PIN Keselamatan Admin</label>
+                            <input type="text" id="setting-admin-pin" maxlength="12" placeholder="Contoh: 1234" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm font-mono font-bold">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Banner Pengumuman Khas Pentadbir (Kosongkan untuk sembunyi)</label>
+                        <input type="text" id="setting-announcement" placeholder="Contoh: Perhatian semua guru bertugas, sila lengkapkan laporan sebelum Jumaat jam 12:30 tengah hari." class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Tajuk Modul 1 (Harian)</label>
+                            <input type="text" id="setting-title-m1" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Tajuk Modul 2 (Keceriaan)</label>
+                            <input type="text" id="setting-title-m2" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Tajuk Modul 3 (Keselamatan)</label>
+                            <input type="text" id="setting-title-m3" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Tajuk Modul 4 (Program RMT)</label>
+                            <input type="text" id="setting-title-m4" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bahagian 2: Identiti & Logo Sekolah -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-skGreen-800">2. Identiti &amp; Lencana Rasmi Sekolah</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Rasmi Sekolah</label>
+                            <input type="text" id="setting-school-name" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Daerah / Negeri / Kod</label>
+                            <input type="text" id="setting-school-code" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Cogan Kata Sekolah</label>
+                            <input type="text" id="setting-school-motto" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Muat Naik Logo Tersuai (Pilihan)</label>
+                            <input type="file" accept="image/*" onchange="handleCustomLogoUpload(event)" class="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-skGreen-100 file:text-skGreen-800">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bahagian 3: Senarai Nama Guru & Kelas -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-bold text-slate-700 uppercase">Senarai Nama Guru (Sebaris Satu)</label>
+                            <button type="button" onclick="restoreDefaultTeachers()" class="text-[11px] font-bold text-skGreen-700 hover:underline">Pulihkan 19 Guru</button>
+                        </div>
+                        <textarea id="setting-teachers-list" rows="7" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium leading-relaxed"></textarea>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-bold text-slate-700 uppercase">Senarai Kelas Rasmi (Sebaris Satu)</label>
+                            <button type="button" onclick="restoreDefaultClasses()" class="text-[11px] font-bold text-skGreen-700 hover:underline">Pulihkan 10 Kelas</button>
+                        </div>
+                        <textarea id="setting-classes-list" rows="7" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium leading-relaxed"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200">
+                    <button type="button" onclick="resetUiAppearanceDefaults()" class="px-3.5 py-2.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-xs font-bold text-amber-900">
+                        Pulihkan Paparan Asal
+                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="closeModal('modal-school-settings')" class="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700">Batal</button>
+                        <button type="button" onclick="saveSchoolSettings()" class="px-5 py-2.5 rounded-xl bg-skGreen-700 hover:bg-skGreen-800 text-white text-xs font-extrabold">Simpan Perubahan Paparan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL SAMBUNG GOOGLE DRIVE & GOOGLE SHEET (NO PRINT) ==================== -->
+    <div id="modal-drive-script" class="no-print hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between">
+                <h3 class="font-extrabold text-base">Jana Google Sheet &amp; Sambung Folder Drive Sekolah</h3>
+                <button type="button" onclick="closeModal('modal-drive-script')" class="text-white/80 hover:text-white text-xl font-bold leading-none">&times;</button>
+            </div>
+            <div class="p-5 space-y-4 max-h-[82vh] overflow-y-auto">
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-900 space-y-1.5">
+                    <p class="font-extrabold text-amber-950">Cara Menjana Google Sheet Terus Dalam Folder Drive Anda (1 Minit):</p>
+                    <ol class="list-decimal list-inside space-y-1 font-medium pt-1">
+                        <li>Klik butang hijau <strong>"1. Salin Kod Script"</strong> di bawah, kemudian buka <a href="https://script.google.com/home/projects/create" target="_blank" rel="noopener noreferrer" class="underline font-extrabold text-skGreen-800">Google Apps Script (Klik Sini)</a>.</li>
+                        <li>Tampal kod tersebut, klik <strong>Run (Jalankan)</strong> sekali &amp; beri kebenaran akses — fail Google Sheet <code class="font-bold">Pangkalan_Data_eLaporan_SK_Seri_Chantek</code> akan <strong>terus muncul dalam Folder Drive <code class="font-bold">15KBs80ThK0oeHX1C6jS_1pQVb-TBKICy</code>!</strong></li>
+                        <li>Klik <strong>Deploy &gt; New deployment &gt; Web app</strong> (akses: <em>Anyone</em>), salin <strong>Web App URL</strong> dan tampal di ruangan bawah ini.</li>
+                    </ol>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <span class="font-bold text-slate-600 block">Folder Google Drive Rasmi:</span>
+                        <span class="font-mono font-bold text-skGreen-800 break-all">15KBs80ThK0oeHX1C6jS_1pQVb-TBKICy</span>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <span class="font-bold text-slate-600 block">Nama Fail Google Sheet dalam Folder:</span>
+                        <span class="font-mono font-bold text-amber-700 break-all">Pangkalan_Data_eLaporan_SK_Seri_Chantek</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">URL Web App Google Apps Script</label>
+                        <input type="url" id="setting-apps-script-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-xs font-mono focus:ring-2 focus:ring-skGreen-600 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">URL Google Sheet (Dalam Folder Drive)</label>
+                        <input type="url" id="setting-sheet-url" placeholder="https://docs.google.com/spreadsheets/d/..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-xs font-mono focus:ring-2 focus:ring-skGreen-600 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 text-slate-100 rounded-xl p-3.5 space-y-2">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <span class="text-xs font-bold text-emerald-400">Kod Google Apps Script (Cipta Sheet &amp; Simpan Rekod ke Folder Drive)</span>
+                        <div class="flex items-center gap-2">
+                            <a href="https://script.google.com/home/projects/create" target="_blank" rel="noopener noreferrer" class="bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold px-3 py-1.5 rounded-lg transition">
+                                2. Buka Apps Script
+                            </a>
+                            <button type="button" onclick="copyAppsScript()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold px-3 py-1.5 rounded-lg transition">
+                                1. Salin Kod Script
+                            </button>
+                        </div>
+                    </div>
+                    <pre id="google-apps-script-code" class="text-[11px] font-mono text-slate-300 bg-black/50 p-3 rounded-lg overflow-x-auto max-h-52 leading-relaxed">// Jalankan fungsi ciptaSheetDalamFolder() sekali di editor Apps Script untuk terus menjana Google Sheet di dalam folder Drive anda!
+function ciptaSheetDalamFolder() {
+  var FOLDER_ID = '15KBs80ThK0oeHX1C6jS_1pQVb-TBKICy';
+  var SHEET_FILENAME = 'Pangkalan_Data_eLaporan_SK_Seri_Chantek';
+  var folder = DriveApp.getFolderById(FOLDER_ID);
+  var ss;
+
+  var existingFiles = folder.getFilesByName(SHEET_FILENAME);
+  if (existingFiles.hasNext()) {
+    ss = SpreadsheetApp.open(existingFiles.next());
+  } else {
+    ss = SpreadsheetApp.create(SHEET_FILENAME);
+    DriveApp.getFileById(ss.getId()).moveTo(folder);
+  }
+
+  var sheet = ss.getSheetByName('Rekod_Mingguan') || ss.getSheets()[0];
+  sheet.setName('Rekod_Mingguan');
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow([
+      'Tarikh Hantar', 'Sekolah', 'Minggu', 'Bil Laporan Harian',
+      'Purata Keceriaan (%)', 'Johan Kelas', 'Bil Isu Keselamatan',
+      'Purata Kehadiran RMT (%)', 'Bil Sesi RMT', 'Pautan Fail Arkib Drive', 'Data JSON'
+    ]);
+  }
+  Logger.log('BERJAYA! Pautan Google Sheet dalam folder anda: ' + ss.getUrl());
+  return ss;
+}
+
+function doPost(e) {
+  var ss = ciptaSheetDalamFolder();
+  var folder = DriveApp.getFolderById('15KBs80ThK0oeHX1C6jS_1pQVb-TBKICy');
+  var sheet = ss.getSheetByName('Rekod_Mingguan');
+
+  var data = JSON.parse(e.postData.contents);
+  var timestamp = Utilities.formatDate(new Date(), 'Asia/Kuala_Lumpur', 'yyyyMMdd_HHmmss');
+
+  // Arkibkan fail JSON laporan mingguan ke Folder Google Drive SK Seri Chantek
+  var jsonFileName = 'eLaporan_SK_Seri_Chantek_Minggu_' + data.week + '_' + timestamp + '.json';
+  var archiveFile = folder.createFile(jsonFileName, JSON.stringify(data, null, 2), MimeType.PLAIN_TEXT);
+
+  // Simpan gambar bukti pemantauan terus ke dalam Folder Google Drive sekolah
+  if (data.photos && data.photos.length > 0) {
+    data.photos.forEach(function(item, index) {
+      if (item.dataUrl && item.dataUrl.indexOf('base64,') > -1) {
+        var base64 = item.dataUrl.split('base64,')[1];
+        var blob = Utilities.newBlob(
+          Utilities.base64Decode(base64),
+          'image/jpeg',
+          'Bukti_' + item.category + '_M' + data.week + '_' + (index + 1) + '_' + timestamp + '.jpg'
+        );
+        folder.createFile(blob);
+      }
+    });
+  }
+
+  sheet.appendRow([
+    new Date(),
+    data.schoolName || 'SEKOLAH KEBANGSAAN SERI CHANTEK',
+    'Minggu ' + data.week,
+    data.dailyCount,
+    data.avgKeceriaan + '%',
+    data.bestClass,
+    data.safetyIssuesCount,
+    data.avgRMT + '%',
+    data.rmtCount,
+    archiveFile.getUrl(),
+    JSON.stringify(data.payload)
+  ]);
+
+  return ContentService.createTextOutput(JSON.stringify({
+    status: 'success',
+    sheetUrl: ss.getUrl(),
+    fileUrl: archiveFile.getUrl()
+  })).setMimeType(ContentService.MimeType.JSON);
+}</pre>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modal-drive-script')" class="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700">Tutup</button>
+                    <button type="button" onclick="saveDriveSettings()" class="px-5 py-2.5 rounded-xl bg-skGreen-700 hover:bg-skGreen-800 text-white text-xs font-extrabold">Simpan Tetapan Drive</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL PANDUAN PEMASANGAN PWA iOS & ANDROID (NO PRINT) ==================== -->
+    <div id="modal-pwa-install" class="no-print hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-skGreen-900 to-emerald-800 text-white px-5 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">📲</span>
+                    <h3 class="font-extrabold text-base">Pasang Aplikasi SK Seri Chantek</h3>
+                </div>
+                <button type="button" onclick="closeModal('modal-pwa-install')" class="text-white/80 hover:text-white text-xl font-bold leading-none">&times;</button>
+            </div>
+            <div class="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs text-slate-700">
+                <p class="leading-relaxed">
+                    Pasang sistem <strong>e-Laporan Guru Bertugas SK Seri Chantek</strong> terus ke skrin utama telefon pintar anda supaya boleh dibuka seperti aplikasi mudah alih rasmi serta menyokong simpanan luar talian (<em>offline</em>).
+                </p>
+
+                <!-- Panduan iOS (iPhone / iPad) -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+                    <div class="flex items-center gap-2 font-extrabold text-slate-900 text-sm">
+                        <span>🍎</span>
+                        <span>Pengguna iOS (iPhone / iPad - Safari)</span>
+                    </div>
+                    <ol class="list-decimal list-inside space-y-1.5 font-medium text-slate-700">
+                        <li>Buka fail atau pautan aplikasi ini menggunakan pelayar <strong>Safari</strong>.</li>
+                        <li>Tekan ikon <strong>Kongsi / Share</strong> <span class="inline-block px-1.5 py-0.5 bg-white border border-slate-300 rounded font-bold">⬆️</span> di bahagian bawah (atau atas) skrin.</li>
+                        <li>Skrol ke bawah dan pilih <strong>"Add to Home Screen" (Tambah ke Skrin Utama)</strong>.</li>
+                        <li>Tekan <strong>Add (Tambah)</strong> di penjuru kanan atas. Ikon lencana <strong>S.K. Seri Chantek</strong> akan muncul di skrin utama anda.</li>
+                    </ol>
+                </div>
+
+                <!-- Panduan Android (Chrome / Edge / Samsung Internet) -->
+                <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3.5 space-y-2">
+                    <div class="flex items-center gap-2 font-extrabold text-emerald-950 text-sm">
+                        <span>🤖</span>
+                        <span>Pengguna Android (Google Chrome)</span>
+                    </div>
+                    <ol class="list-decimal list-inside space-y-1.5 font-medium text-slate-700">
+                        <li>Buka aplikasi ini dalam pelayar <strong>Google Chrome</strong>.</li>
+                        <li>Tekan menu <strong>3 Titik (⋮)</strong> di penjuru kanan atas pelayar.</li>
+                        <li>Pilih <strong>"Install app" (Pasang aplikasi)</strong> atau <strong>"Add to Home screen"</strong>.</li>
+                        <li>Sahkan pemasangan — aplikasi akan dipasang terus ke senarai aplikasi telefon Android anda.</li>
+                    </ol>
+                </div>
+
+                <div class="flex justify-end pt-1">
+                    <button type="button" onclick="closeModal('modal-pwa-install')" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-skGreen-700 hover:bg-skGreen-800 text-white text-xs font-extrabold">Faham &amp; Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== DOKUMEN CETAKAN PDF RASMI (HANYA MUNCUL KETIKA PRINT) ==================== -->
+    <div id="print-report-container" class="hidden">
+        <!-- Dijana secara dinamik oleh printOfficialWeeklyReport() -->
+    </div>
+
+    <!-- ==================== DATALIST GURU & TOAST NOTIFICATION ==================== -->
+    <datalist id="teacher-datalist"></datalist>
+    <div id="toast-container" class="no-print fixed bottom-20 md:bottom-6 right-4 z-50 space-y-2 max-w-sm"></div>
+
+    <!-- ==================== SKRIP UTAMA SISTEM (LENGKAP & KENDIRI) ==================== -->
+    <script>
+        // 1. SENARAI RASMI 19 ORANG GURU & 10 KELAS SK SERI CHANTEK
+        const DEFAULT_TEACHERS = [
+            "EN. AHMAD HARIZ AIMAN BIN HISHAMMUDIN",
+            "EN. GHOZAHAR BIN GHOZI",
+            "EN. HASBUN NAZLI BIN KOMAR",
+            "EN. MOHAMAD JAMSARI BIN PARMO",
+            "EN. MOHAMAD AZZRUL ARIFF BIN HAMSAN",
+            "EN. MOHD HARITH BIN ABDUL RAHIM",
+            "EN. NAIM SIDDIQI BIN MUHD SUHIMI",
+            "CIK HJH. FARAH WAHIDA BINTI MOHD SOM",
+            "PN. KAMALIAH BINTI SAABAN",
+            "PN. MAHYUN BINTI MA'AROF",
+            "PN. NORAZILAH BINTI SAMIJAN",
+            "PN. NOR HAZLILA BINTI BASIRAN",
+            "PN. NORIZAN BINTI MOHD YUSOF",
+            "CIK NUR MAHIRA BINTI MOHAMAD ROBANI",
+            "CIK NUR MUIEZAH BINTI MUHYDIN",
+            "PN. PUSPAWATI BINTI PARNI",
+            "PN. SALBIAH BINTI BUANG",
+            "PN. SITI FATIMAH BINTI AHMAD",
+            "PN. SITI NADIRA BINTI ABU SAMAH"
+        ];
+
+        const DEFAULT_CLASSES = [
+            "1 BIJAK",
+            "1 CERDIK",
+            "2 BIJAK",
+            "2 CERDIK",
+            "3 BIJAK",
+            "4 BIJAK",
+            "4 CERDIK",
+            "5 BIJAK",
+            "5 CERDIK",
+            "6 BIJAK"
+        ];
+
+        const OFFICIAL_DRIVE_FOLDER_ID = "15KBs80ThK0oeHX1C6jS_1pQVb-TBKICy";
+        const OFFICIAL_DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/15KBs80ThK0oeHX1C6jS_1pQVb-TBKICy?usp=sharing";
+        const OFFICIAL_SHEET_URL = "https://docs.google.com/spreadsheets/d/1Cmbmn1rVg5ZIFAD_UuOUppVb-Dml5OirCctQkitnvmo/edit";
+        const STORAGE_KEY = "sksc_elaporan_guru_bertugas_v3";
+
+        const KECERIAAN_CRITERIA = [
+            { id: "c1", label: "Kebersihan Lantai, Tingkap & Bakul Sampah" },
+            { id: "c2", label: "Susunan Meja, Kerusi & Meja Guru Teratur" },
+            { id: "c3", label: "Papan Kenyataan, Jadual & Carta Kelas Lengkap" },
+            { id: "c4", label: "Sudut Bacaan, Informasi & Bahan Bantu Mengajar" },
+            { id: "c5", label: "Pencahayaan, Pengudaraan & Suis Ditutup Selepas PdPc" }
+        ];
+
+        const KESELAMATAN_ZONES = [
+            { id: "z1", name: "Pagar Utama, Pintu Kecil & Pondok Pengawal" },
+            { id: "z2", name: "Kantin Sekolah, Longkang & Ruang Makan Murid" },
+            { id: "z3", name: "Tandas Murid Lelaki, Perempuan & Tandas Guru" },
+            { id: "z4", name: "Makmal Sains, Bilik RBT, Pusat Sumber & Bilik Khas" },
+            { id: "z5", name: "Pendawaian Elektrik, Kipas, Lampu & Alat Pemadam Api" },
+            { id: "z6", name: "Padang Sekolah, Gelanggang & Laluan Trafik Ibu Bapa" }
+        ];
+
+        const RMT_CRITERIA = [
+            { id: "r1", label: "Ketepatan Masa Penghantaran & Hidangan" },
+            { id: "r2", label: "Kuantiti & Sukatan Makanan Mencukupi" },
+            { id: "r3", label: "Kesegaran, Rasa & Suhu Makanan Sesuai" },
+            { id: "r4", label: "Kebersihan Peralatan, Pinggan & Ruang Makan" },
+            { id: "r5", label: "Etika Kebersihan Pengendali Makanan (Apron/Topi)" }
+        ];
+
+        const DEFAULT_UI_CONFIG = {
+            appTitle: "e-Laporan Guru Bertugas",
+            appBadge: "3K • Keselamatan • RMT",
+            themeColor: "emerald",
+            announcement: "",
+            titleM1: "Laporan Harian Guru Bertugas Mingguan",
+            titleM2: "Penilaian Kebersihan & Keceriaan Bilik Darjah",
+            titleM3: "Senarai Semak Keselamatan Kawasan Sekolah",
+            titleM4: "Laporan Pemantauan Harian Program RMT"
+        };
+
+        // 2. KEADAAN APLIKASI (STATE)
+        let appState = {
+            activeWeek: 1,
+            role: "guru", // 'guru' atau 'admin'
+            adminPin: "1234",
+            schoolName: "SEKOLAH KEBANGSAAN SERI CHANTEK",
+            schoolCode: "Batu Pahat, Johor (1953)",
+            schoolMotto: "HIDUP BERBAKTI",
+            customLogo: "",
+            appsScriptUrl: "",
+            sheetUrl: OFFICIAL_SHEET_URL,
+            teachers: [...DEFAULT_TEACHERS],
+            classes: [...DEFAULT_CLASSES],
+            uiConfig: { ...DEFAULT_UI_CONFIG },
+            records: {
+                harian: [],
+                keceriaan: [],
+                keselamatan: [],
+                rmt: []
+            },
+            verifiedWeeks: {}
+        };
+
+        let tempPhotos = {
+            keceriaan: "",
+            keselamatan: "",
+            rmt: ""
+        };
+
+        let deferredPwaPrompt = null;
+
+        // 3. INISIALISASI SISTEM & PWA (iOS & ANDROID)
+        document.addEventListener("DOMContentLoaded", () => {
+            initPwaSupport();
+            loadStateFromStorage();
+            populateWeekSelectors();
+            setDefaultDates();
+            renderTeacherSelectors();
+            renderKeceriaanClassOptions();
+            renderKeceriaanCriteria();
+            renderKeselamatanZones();
+            renderRmtCriteria();
+            addHealthRow();
+            calculateRmtLive();
+            applyRoleAndUiAppearance();
+            updateAllUI();
+        });
+
+        // Penjanaan Ikon PWA, Web App Manifest & Service Worker untuk Sokongan Penuh iOS & Android
+        function initPwaSupport() {
+            window.addEventListener("beforeinstallprompt", (e) => {
+                e.preventDefault();
+                deferredPwaPrompt = e;
+                const installBtn = document.getElementById("btn-install-pwa");
+                if (installBtn) {
+                    installBtn.classList.add("animate-pulse");
+                }
+            });
+
+            window.addEventListener("appinstalled", () => {
+                deferredPwaPrompt = null;
+                showToast("Aplikasi e-Laporan SK Seri Chantek berjaya dipasang ke peranti!", "success");
+            });
+
+            try {
+                // Jana Ikon PNG 512x512 berasaskan Lencana Rasmi SK Seri Chantek untuk iOS & Android
+                const canvas = document.createElement("canvas");
+                canvas.width = 512;
+                canvas.height = 512;
+                const ctx = canvas.getContext("2d");
+
+                // Latar belakang hijau tua rasmi dengan sudut membulat
+                ctx.fillStyle = "#14532d";
+                ctx.fillRect(0, 0, 512, 512);
+
+                // Bingkai emas
+                ctx.strokeStyle = "#eab308";
+                ctx.lineWidth = 18;
+                ctx.strokeRect(20, 20, 472, 472);
+
+                // Perisai 4 sukuan
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(256, 56);
+                ctx.lineTo(400, 92);
+                ctx.lineTo(400, 255);
+                ctx.quadraticCurveTo(400, 345, 256, 396);
+                ctx.quadraticCurveTo(112, 345, 112, 255);
+                ctx.lineTo(112, 92);
+                ctx.closePath();
+                ctx.clip();
+
+                ctx.fillStyle = "#facc15";
+                ctx.fillRect(112, 56, 144, 170);
+                ctx.fillStyle = "#16a34a";
+                ctx.fillRect(256, 56, 144, 170);
+                ctx.fillRect(112, 226, 144, 170);
+                ctx.fillStyle = "#facc15";
+                ctx.fillRect(256, 226, 144, 170);
+                ctx.restore();
+
+                ctx.strokeStyle = "#fef08a";
+                ctx.lineWidth = 8;
+                ctx.beginPath();
+                ctx.moveTo(256, 56);
+                ctx.lineTo(400, 92);
+                ctx.lineTo(400, 255);
+                ctx.quadraticCurveTo(400, 345, 256, 396);
+                ctx.quadraticCurveTo(112, 345, 112, 255);
+                ctx.lineTo(112, 92);
+                ctx.closePath();
+                ctx.stroke();
+
+                // Teks Lencana Rasmi
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "900 34px Inter, sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("S.K. SERI CHANTEK", 256, 444);
+
+                ctx.fillStyle = "#fde047";
+                ctx.font = "700 20px Inter, sans-serif";
+                ctx.fillText("e-LAPORAN 3K • RMT (1953)", 256, 476);
+
+                const iconPngUrl = canvas.toDataURL("image/png");
+                const appleIcon = document.getElementById("apple-touch-icon-link");
+                const favIcon = document.getElementById("pwa-favicon-link");
+                if (appleIcon) appleIcon.href = iconPngUrl;
+                if (favIcon) favIcon.href = iconPngUrl;
+
+                // Bina Web App Manifest dinamik untuk pemasangan Android & iOS
+                const manifestObj = {
+                    name: "Sistem e-Laporan Guru Bertugas - SK Seri Chantek",
+                    short_name: "e-Laporan SKSC",
+                    description: "Aplikasi Laporan Guru Bertugas Mingguan, Keceriaan 3K, Keselamatan & RMT SK Seri Chantek",
+                    start_url: window.location.href,
+                    display: "standalone",
+                    orientation: "portrait",
+                    background_color: "#f8fafc",
+                    theme_color: "#14532d",
+                    icons: [
+                        { src: iconPngUrl, sizes: "192x192", type: "image/png", purpose: "any maskable" },
+                        { src: iconPngUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }
+                    ]
+                };
+                const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: "application/manifest+json" });
+                const manifestUrl = URL.createObjectURL(manifestBlob);
+                const manifestLink = document.getElementById("pwa-manifest-link");
+                if (manifestLink) manifestLink.href = manifestUrl;
+
+                // Daftar Service Worker Luar Talian (Jika dihoskan pada HTTPS / Localhost)
+                if ("serviceWorker" in navigator && (window.location.protocol === "https:" || window.location.hostname === "localhost")) {
+                    const swCode = `
+                        const CACHE_NAME = 'sksc-elaporan-pwa-v1';
+                        self.addEventListener('install', (event) => {
+                            self.skipWaiting();
+                        });
+                        self.addEventListener('activate', (event) => {
+                            event.waitUntil(clients.claim());
+                        });
+                        self.addEventListener('fetch', (event) => {
+                            if (event.request.method !== 'GET') return;
+                            event.respondWith(
+                                fetch(event.request).then((response) => {
+                                    const copy = response.clone();
+                                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+                                    return response;
+                                }).catch(() => caches.match(event.request))
+                            );
+                        });
+                    `;
+                    const swBlob = new Blob([swCode], { type: "application/javascript" });
+                    const swUrl = URL.createObjectURL(swBlob);
+                    navigator.serviceWorker.register(swUrl).catch(() => {});
+                }
+            } catch (err) {
+                console.warn("Inisialisasi PWA:", err);
+            }
+        }
+
+        async function triggerPwaInstall() {
+            if (deferredPwaPrompt) {
+                deferredPwaPrompt.prompt();
+                const choice = await deferredPwaPrompt.userChoice;
+                if (choice.outcome === "accepted") {
+                    deferredPwaPrompt = null;
+                }
+            } else {
+                // Paparkan panduan pemasangan khusus iOS (Safari) & Android (Chrome)
+                document.getElementById("modal-pwa-install").classList.remove("hidden");
+            }
+        }
+
+        function loadStateFromStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    appState = {
+                        ...appState,
+                        ...parsed,
+                        teachers: Array.isArray(parsed.teachers) && parsed.teachers.length ? parsed.teachers : [...DEFAULT_TEACHERS],
+                        classes: Array.isArray(parsed.classes) && parsed.classes.length ? parsed.classes : [...DEFAULT_CLASSES],
+                        uiConfig: { ...DEFAULT_UI_CONFIG, ...(parsed.uiConfig || {}) },
+                        records: {
+                            harian: parsed.records?.harian || [],
+                            keceriaan: parsed.records?.keceriaan || [],
+                            keselamatan: parsed.records?.keselamatan || [],
+                            rmt: parsed.records?.rmt || []
+                        },
+                        verifiedWeeks: parsed.verifiedWeeks || {}
+                    };
+                }
+            } catch (err) {
+                console.warn("Gagal membaca simpanan tempatan:", err);
+            }
+        }
+
+        function saveStateToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            } catch (err) {
+                showToast("Amaran: Ruang simpanan pelayar hampir penuh. Sila hantar rekod ke Google Drive.", "error");
+            }
+        }
+
+        function setDefaultDates() {
+            const today = new Date().toISOString().split("T")[0];
+            ["harian-tarikh", "keceriaan-tarikh", "keselamatan-tarikh", "rmt-tarikh"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el && !el.value) el.value = today;
+            });
+        }
+
+        function populateWeekSelectors() {
+            let optionsHtml = "";
+            for (let w = 1; w <= 42; w++) {
+                optionsHtml += `<option value="${w}">Minggu ${w}</option>`;
+            }
+            const globalSel = document.getElementById("global-week-selector");
+            const harianSel = document.getElementById("harian-minggu");
+            if (globalSel) {
+                globalSel.innerHTML = optionsHtml;
+                globalSel.value = String(appState.activeWeek);
+            }
+            if (harianSel) {
+                harianSel.innerHTML = optionsHtml;
+                harianSel.value = String(appState.activeWeek);
+            }
+        }
+
+        function onGlobalWeekChange(weekVal) {
+            appState.activeWeek = parseInt(weekVal, 10) || 1;
+            const harianSel = document.getElementById("harian-minggu");
+            if (harianSel) harianSel.value = String(appState.activeWeek);
+            saveStateToStorage();
+            updateAllUI();
+        }
+
+        function onFormWeekChange(weekVal) {
+            appState.activeWeek = parseInt(weekVal, 10) || 1;
+            const globalSel = document.getElementById("global-week-selector");
+            if (globalSel) globalSel.value = String(appState.activeWeek);
+            saveStateToStorage();
+            updateAllUI();
+        }
+
+        // 4. NAVIGASI TAB & PENYEGARAN SISTEM
+        function switchTab(tabName) {
+            document.querySelectorAll(".tab-panel").forEach(sec => sec.classList.add("hidden"));
+            const target = document.getElementById(`tab-${tabName}`);
+            if (target) target.classList.remove("hidden");
+
+            document.querySelectorAll(".nav-tab-desktop").forEach(btn => {
+                const active = btn.dataset.tab === tabName;
+                btn.classList.toggle("border-skGreen-700", active);
+                btn.classList.toggle("text-skGreen-800", active);
+                btn.classList.toggle("font-bold", active);
+                btn.classList.toggle("border-transparent", !active);
+                btn.classList.toggle("text-slate-500", !active);
+                btn.classList.toggle("font-semibold", !active);
+            });
+
+            document.querySelectorAll(".nav-tab-mobile").forEach(btn => {
+                const active = btn.dataset.tab === tabName;
+                btn.classList.toggle("text-skGreen-800", active);
+                btn.classList.toggle("font-extrabold", active);
+                btn.classList.toggle("text-slate-500", !active);
+                btn.classList.toggle("font-semibold", !active);
+            });
+
+            updateAllUI();
+        }
+
+        function refreshSystem() {
+            const icon = document.getElementById("refresh-icon");
+            if (icon) icon.classList.add("animate-spin");
+            loadStateFromStorage();
+            renderTeacherSelectors();
+            renderKeceriaanClassOptions();
+            applyRoleAndUiAppearance();
+            updateAllUI();
+            setTimeout(() => {
+                if (icon) icon.classList.remove("animate-spin");
+                showToast("Sistem dan paparan telah disegarkan semula.", "success");
+            }, 400);
+        }
+
+        // 5. MOD GURU & MOD ADMIN (KAWALAN AKSES & EDITOR PAPARAN)
+        function handleRoleSwitchClick() {
+            if (appState.role === "admin") {
+                switchToGuruMode();
+            } else {
+                const pinInput = document.getElementById("admin-pin-input");
+                if (pinInput) pinInput.value = "";
+                document.getElementById("modal-admin-login").classList.remove("hidden");
+                setTimeout(() => pinInput && pinInput.focus(), 100);
+            }
+        }
+
+        function verifyAdminLogin() {
+            const entered = (document.getElementById("admin-pin-input").value || "").trim();
+            if (entered === appState.adminPin) {
+                appState.role = "admin";
+                saveStateToStorage();
+                closeModal("modal-admin-login");
+                applyRoleAndUiAppearance();
+                updateAllUI();
+                showToast("Berjaya masuk ke Mod Admin Pentadbir.", "success");
+            } else {
+                showToast("PIN Admin tidak sah. Sila cuba lagi (Lalai: 1234).", "error");
+            }
+        }
+
+        function switchToGuruMode() {
+            appState.role = "guru";
+            saveStateToStorage();
+            applyRoleAndUiAppearance();
+            updateAllUI();
+            showToast("Kembali ke Mod Guru Bertugas.", "info");
+        }
+
+        function applyRoleAndUiAppearance() {
+            const isAdmin = appState.role === "admin";
+            const ui = appState.uiConfig || DEFAULT_UI_CONFIG;
+
+            // Kemas kini tema warna header
+            const header = document.getElementById("main-app-header");
+            if (header) {
+                header.classList.remove(
+                    "from-skGreen-900", "via-skGreen-800", "to-emerald-800",
+                    "from-slate-900", "via-blue-900", "to-indigo-900",
+                    "from-rose-950", "via-red-900", "to-rose-800",
+                    "from-slate-950", "via-slate-800", "to-zinc-800"
+                );
+                if (ui.themeColor === "navy") {
+                    header.classList.add("from-slate-900", "via-blue-900", "to-indigo-900");
+                } else if (ui.themeColor === "maroon") {
+                    header.classList.add("from-rose-950", "via-red-900", "to-rose-800");
+                } else if (ui.themeColor === "slate") {
+                    header.classList.add("from-slate-950", "via-slate-800", "to-zinc-800");
+                } else {
+                    header.classList.add("from-skGreen-900", "via-skGreen-800", "to-emerald-800");
+                }
+            }
+
+            // Tajuk & Identiti
+            const titleEl = document.getElementById("header-app-title");
+            const badgeEl = document.getElementById("header-app-badge");
+            const subtitleEl = document.getElementById("header-school-subtitle");
+            if (titleEl) titleEl.textContent = ui.appTitle || DEFAULT_UI_CONFIG.appTitle;
+            if (badgeEl) badgeEl.textContent = ui.appBadge || DEFAULT_UI_CONFIG.appBadge;
+            if (subtitleEl) subtitleEl.textContent = `${appState.schoolName} • ${appState.schoolCode}`;
+
+            // Tajuk Modul
+            document.getElementById("title-modul-1").textContent = ui.titleM1 || DEFAULT_UI_CONFIG.titleM1;
+            document.getElementById("title-modul-2").textContent = ui.titleM2 || DEFAULT_UI_CONFIG.titleM2;
+            document.getElementById("title-modul-3").textContent = ui.titleM3 || DEFAULT_UI_CONFIG.titleM3;
+            document.getElementById("title-modul-4").textContent = ui.titleM4 || DEFAULT_UI_CONFIG.titleM4;
+
+            // Banner Pengumuman
+            const banner = document.getElementById("admin-announcement-banner");
+            const bannerText = document.getElementById("admin-announcement-text");
+            if (ui.announcement && ui.announcement.trim()) {
+                bannerText.textContent = ui.announcement.trim();
+                banner.classList.remove("hidden");
+            } else {
+                banner.classList.add("hidden");
+            }
+
+            // Logo Tersuai (jika ada)
+            if (appState.customLogo) {
+                document.getElementById("header-logo-wrapper").innerHTML = `<img src="${appState.customLogo}" alt="Logo Sekolah" class="w-full h-full object-contain rounded-xl">`;
+            }
+
+            // Kawalan Mod Admin vs Mod Guru
+            const rolePill = document.getElementById("role-status-pill");
+            const roleBtnLabel = document.getElementById("role-btn-label");
+            const roleIcon = document.getElementById("role-icon");
+            const btnAdminEditor = document.getElementById("btn-admin-editor");
+            const adminToolbar = document.getElementById("admin-quick-toolbar");
+
+            if (isAdmin) {
+                rolePill.textContent = "Mod Admin";
+                rolePill.className = "text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-400 text-slate-950";
+                roleBtnLabel.textContent = "Mod Guru";
+                roleIcon.textContent = "👨‍🏫";
+                btnAdminEditor.classList.remove("hidden");
+                btnAdminEditor.classList.add("flex");
+                adminToolbar.classList.remove("hidden");
+                document.querySelectorAll(".admin-only-control").forEach(el => {
+                    el.classList.remove("hidden");
+                    if (el.tagName === "BUTTON") el.classList.add("inline-flex");
+                });
+            } else {
+                rolePill.textContent = "Mod Guru";
+                rolePill.className = "text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-white/15 border border-white/25 text-emerald-100";
+                roleBtnLabel.textContent = "Mod Admin";
+                roleIcon.textContent = "🔐";
+                btnAdminEditor.classList.add("hidden");
+                btnAdminEditor.classList.remove("flex");
+                adminToolbar.classList.add("hidden");
+                document.querySelectorAll(".admin-only-control").forEach(el => {
+                    el.classList.add("hidden");
+                    el.classList.remove("inline-flex");
+                });
+            }
+        }
+
+        function openAdminEditorModal() {
+            if (appState.role !== "admin") return;
+            const ui = appState.uiConfig || DEFAULT_UI_CONFIG;
+            document.getElementById("setting-app-title").value = ui.appTitle;
+            document.getElementById("setting-app-badge").value = ui.appBadge;
+            document.getElementById("setting-theme-color").value = ui.themeColor || "emerald";
+            document.getElementById("setting-admin-pin").value = appState.adminPin || "1234";
+            document.getElementById("setting-announcement").value = ui.announcement || "";
+            document.getElementById("setting-title-m1").value = ui.titleM1;
+            document.getElementById("setting-title-m2").value = ui.titleM2;
+            document.getElementById("setting-title-m3").value = ui.titleM3;
+            document.getElementById("setting-title-m4").value = ui.titleM4;
+
+            document.getElementById("setting-school-name").value = appState.schoolName;
+            document.getElementById("setting-school-code").value = appState.schoolCode;
+            document.getElementById("setting-school-motto").value = appState.schoolMotto;
+            document.getElementById("setting-teachers-list").value = appState.teachers.join("\n");
+            document.getElementById("setting-classes-list").value = appState.classes.join("\n");
+
+            document.getElementById("modal-school-settings").classList.remove("hidden");
+        }
+
+        function saveSchoolSettings() {
+            appState.uiConfig = {
+                appTitle: document.getElementById("setting-app-title").value.trim() || DEFAULT_UI_CONFIG.appTitle,
+                appBadge: document.getElementById("setting-app-badge").value.trim() || DEFAULT_UI_CONFIG.appBadge,
+                themeColor: document.getElementById("setting-theme-color").value || "emerald",
+                announcement: document.getElementById("setting-announcement").value.trim(),
+                titleM1: document.getElementById("setting-title-m1").value.trim() || DEFAULT_UI_CONFIG.titleM1,
+                titleM2: document.getElementById("setting-title-m2").value.trim() || DEFAULT_UI_CONFIG.titleM2,
+                titleM3: document.getElementById("setting-title-m3").value.trim() || DEFAULT_UI_CONFIG.titleM3,
+                titleM4: document.getElementById("setting-title-m4").value.trim() || DEFAULT_UI_CONFIG.titleM4
+            };
+
+            const newPin = document.getElementById("setting-admin-pin").value.trim();
+            if (newPin.length >= 4) {
+                appState.adminPin = newPin;
+            }
+
+            appState.schoolName = document.getElementById("setting-school-name").value.trim() || "SEKOLAH KEBANGSAAN SERI CHANTEK";
+            appState.schoolCode = document.getElementById("setting-school-code").value.trim() || "Batu Pahat, Johor (1953)";
+            appState.schoolMotto = document.getElementById("setting-school-motto").value.trim() || "HIDUP BERBAKTI";
+
+            const teachersLines = document.getElementById("setting-teachers-list").value
+                .split("\n").map(s => s.trim()).filter(Boolean);
+            if (teachersLines.length > 0) appState.teachers = teachersLines;
+
+            const classesLines = document.getElementById("setting-classes-list").value
+                .split("\n").map(s => s.trim()).filter(Boolean);
+            if (classesLines.length > 0) appState.classes = classesLines;
+
+            saveStateToStorage();
+            renderTeacherSelectors();
+            renderKeceriaanClassOptions();
+            applyRoleAndUiAppearance();
+            updateAllUI();
+            closeModal("modal-school-settings");
+            showToast("Perubahan paparan dan tetapan sekolah berjaya disimpan.", "success");
+        }
+
+        function resetUiAppearanceDefaults() {
+            appState.uiConfig = { ...DEFAULT_UI_CONFIG };
+            saveStateToStorage();
+            applyRoleAndUiAppearance();
+            openAdminEditorModal();
+            showToast("Paparan antaramuka dipulihkan kepada tetapan asal.", "info");
+        }
+
+        function restoreDefaultTeachers() {
+            document.getElementById("setting-teachers-list").value = DEFAULT_TEACHERS.join("\n");
+            showToast("Senarai 19 guru rasmi SK Seri Chantek dipulihkan.", "info");
+        }
+
+        function restoreDefaultClasses() {
+            document.getElementById("setting-classes-list").value = DEFAULT_CLASSES.join("\n");
+            showToast("Senarai 10 kelas rasmi SK Seri Chantek dipulihkan.", "info");
+        }
+
+        function handleCustomLogoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            compressImage(file, 260, 0.85, (dataUrl) => {
+                appState.customLogo = dataUrl;
+                saveStateToStorage();
+                applyRoleAndUiAppearance();
+                showToast("Logo sekolah tersuai dimuat naik.", "success");
+            });
+        }
+
+        // 6. MODUL 1: PENGURUSAN GURU BERTUGAS & LAPORAN HARIAN
+        function renderTeacherSelectors() {
+            const ketuaSelect = document.getElementById("harian-ketua-select");
+            const datalist = document.getElementById("teacher-datalist");
+            const chipsContainer = document.getElementById("ahli-teacher-chips");
+
+            if (ketuaSelect) {
+                const prevVal = ketuaSelect.value;
+                let opts = `<option value="">-- Pilih Ketua Guru Bertugas --</option>`;
+                appState.teachers.forEach(t => {
+                    opts += `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`;
+                });
+                opts += `<option value="__MANUAL__">+ Lain-lain / Taip Nama Manual...</option>`;
+                ketuaSelect.innerHTML = opts;
+                if (prevVal) ketuaSelect.value = prevVal;
+            }
+
+            if (datalist) {
+                datalist.innerHTML = appState.teachers.map(t => `<option value="${escapeHtml(t)}">`).join("");
+            }
+
+            if (chipsContainer) {
+                chipsContainer.innerHTML = appState.teachers.map(t => `
+                    <button type="button" data-teacher="${escapeHtml(t)}" onclick="toggleAhliTeacherChip(this.dataset.teacher)"
+                        class="ahli-chip text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-skGreen-300 bg-white text-slate-700 hover:bg-skGreen-100 transition">
+                        + ${escapeHtml(t)}
+                    </button>
+                `).join("");
+                syncAhliChipsFromInput();
+            }
+        }
+
+        function handleKetuaSelectChange(val) {
+            const manualInput = document.getElementById("harian-ketua-manual");
+            const barKetua = document.getElementById("bar-ketua-name");
+            if (val === "__MANUAL__") {
+                manualInput.classList.remove("hidden");
+                manualInput.focus();
+                barKetua.textContent = manualInput.value.trim() || "Input Manual";
+            } else {
+                manualInput.classList.add("hidden");
+                barKetua.textContent = val || "Belum dipilih";
+            }
+        }
+
+        function getSelectedKetuaName() {
+            const sel = document.getElementById("harian-ketua-select").value;
+            if (sel === "__MANUAL__") {
+                return document.getElementById("harian-ketua-manual").value.trim();
+            }
+            return sel.trim();
+        }
+
+        function toggleAhliTeacherChip(teacherName) {
+            const input = document.getElementById("harian-ahli");
+            let currentList = input.value.split(";").map(s => s.trim()).filter(Boolean);
+            const idx = currentList.indexOf(teacherName);
+            if (idx > -1) {
+                currentList.splice(idx, 1);
+            } else {
+                currentList.push(teacherName);
+            }
+            input.value = currentList.join("; ");
+            syncAhliChipsFromInput();
+        }
+
+        function syncAhliChipsFromInput() {
+            const inputVal = document.getElementById("harian-ahli").value;
+            const selected = inputVal.split(";").map(s => s.trim()).filter(Boolean);
+            document.querySelectorAll(".ahli-chip").forEach(btn => {
+                const name = btn.dataset.teacher;
+                const isSelected = selected.includes(name);
+                btn.classList.toggle("bg-skGreen-700", isSelected);
+                btn.classList.toggle("text-white", isSelected);
+                btn.classList.toggle("border-skGreen-800", isSelected);
+                btn.classList.toggle("bg-white", !isSelected);
+                btn.classList.toggle("text-slate-700", !isSelected);
+                btn.textContent = isSelected ? `✓ ${name}` : `+ ${name}`;
+            });
+        }
+
+        function clearSelectedAhli() {
+            document.getElementById("harian-ahli").value = "";
+            syncAhliChipsFromInput();
+        }
+
+        function addHealthRow() {
+            const container = document.getElementById("health-rows-container");
+            const row = document.createElement("div");
+            row.className = "health-row grid grid-cols-1 sm:grid-cols-12 gap-2 bg-white p-2.5 rounded-xl border border-slate-200";
+            row.innerHTML = `
+                <input type="text" placeholder="Nama Murid" class="health-nama sm:col-span-4 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold">
+                <input type="text" placeholder="Kelas (cth: 4 Bijak)" class="health-kelas sm:col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-xs">
+                <input type="text" placeholder="Masalah / Simptom" class="health-masalah sm:col-span-3 rounded-lg border border-slate-300 px-3 py-2 text-xs">
+                <div class="sm:col-span-3 flex gap-1.5">
+                    <input type="text" placeholder="Tindakan (Bilik Rawatan/Pulang)" class="health-tindakan w-full rounded-lg border border-slate-300 px-3 py-2 text-xs">
+                    <button type="button" onclick="this.closest('.health-row').remove()" title="Buang Baris" class="px-2.5 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs shrink-0">&times;</button>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        function saveHarianRecord() {
+            const week = parseInt(document.getElementById("harian-minggu").value, 10) || appState.activeWeek;
+            const tarikh = document.getElementById("harian-tarikh").value;
+            const hari = document.getElementById("harian-hari").value;
+            const ketua = getSelectedKetuaName();
+            const ahli = document.getElementById("harian-ahli").value.trim();
+            const ucapan = document.getElementById("harian-ucapan").value.trim();
+            const disiplin = document.getElementById("harian-disiplin").value.trim();
+
+            if (!tarikh) {
+                showToast("Sila pilih tarikh laporan harian.", "error");
+                return;
+            }
+            if (!ketua) {
+                showToast("Sila pilih atau masukkan nama Ketua Guru Bertugas.", "error");
+                return;
+            }
+
+            const kesihatan = [];
+            document.querySelectorAll(".health-row").forEach(row => {
+                const nama = row.querySelector(".health-nama").value.trim();
+                const kelas = row.querySelector(".health-kelas").value.trim();
+                const masalah = row.querySelector(".health-masalah").value.trim();
+                const tindakan = row.querySelector(".health-tindakan").value.trim();
+                if (nama || masalah) {
+                    kesihatan.push({ nama, kelas, masalah, tindakan });
+                }
+            });
+
+            const record = {
+                id: "HR-" + Date.now(),
+                week,
+                tarikh,
+                hari,
+                ketua,
+                ahli,
+                ucapan,
+                disiplin,
+                kesihatan,
+                createdAt: new Date().toISOString()
+            };
+
+            appState.records.harian.unshift(record);
+            saveStateToStorage();
+            updateAllUI();
+            showToast(`Laporan Harian (${hari}, Minggu ${week}) berjaya disimpan.`, "success");
+        }
+
+        function resetHarianForm() {
+            document.getElementById("harian-ucapan").value = "";
+            document.getElementById("harian-disiplin").value = "";
+            document.getElementById("health-rows-container").innerHTML = "";
+            addHealthRow();
+            showToast("Borang Laporan Harian telah dikosongkan.", "info");
+        }
+
+        // 7. MODUL 2: PEMANTAUAN KECERIAAN KELAS (10 KELAS RASMI SK SERI CHANTEK)
+        function renderKeceriaanClassOptions() {
+            const select = document.getElementById("keceriaan-kelas-select");
+            const chips = document.getElementById("keceriaan-kelas-chips");
+            const label = document.getElementById("label-kelas-chips");
+
+            if (label) {
+                label.textContent = `Pilih Pantas ${appState.classes.length} Kelas Rasmi SK Seri Chantek:`;
+            }
+            if (select) {
+                let html = `<option value="">-- Pilih Kelas --</option>`;
+                appState.classes.forEach(cls => {
+                    html += `<option value="${escapeHtml(cls)}">${escapeHtml(cls)}</option>`;
+                });
+                html += `<option value="__MANUAL__">+ Kelas Lain / Input Manual...</option>`;
+                select.innerHTML = html;
+            }
+            if (chips) {
+                chips.innerHTML = appState.classes.map(cls => `
+                    <button type="button" onclick="selectKeceriaanClassChip('${escapeHtml(cls)}')"
+                        class="kelas-chip text-xs font-bold px-3 py-1.5 rounded-xl bg-white border border-emerald-300 text-emerald-900 hover:bg-emerald-600 hover:text-white transition">
+                        ${escapeHtml(cls)}
+                    </button>
+                `).join("");
+            }
+        }
+
+        function handleKeceriaanKelasSelect(val) {
+            const manual = document.getElementById("keceriaan-kelas-manual");
+            if (val === "__MANUAL__") {
+                manual.classList.remove("hidden");
+                manual.focus();
+            } else {
+                manual.classList.add("hidden");
+            }
+        }
+
+        function selectKeceriaanClassChip(clsName) {
+            const select = document.getElementById("keceriaan-kelas-select");
+            const manual = document.getElementById("keceriaan-kelas-manual");
+            select.value = clsName;
+            manual.classList.add("hidden");
+            document.querySelectorAll(".kelas-chip").forEach(btn => {
+                const active = btn.textContent.trim() === clsName;
+                btn.classList.toggle("bg-emerald-700", active);
+                btn.classList.toggle("text-white", active);
+                btn.classList.toggle("bg-white", !active);
+                btn.classList.toggle("text-emerald-900", !active);
+            });
+        }
+
+        function renderKeceriaanCriteria() {
+            const container = document.getElementById("keceriaan-criteria-list");
+            container.innerHTML = KECERIAAN_CRITERIA.map(c => `
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between gap-3">
+                    <span class="text-xs font-bold text-slate-800">${escapeHtml(c.label)}</span>
+                    <select data-crit="${c.id}" onchange="calculateKeceriaanLive()" class="keceriaan-score-select rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-extrabold text-skGreen-800 shrink-0">
+                        <option value="5">5 ★ (Cemerlang)</option>
+                        <option value="4" selected>4 ★ (Baik)</option>
+                        <option value="3">3 ★ (Memuaskan)</option>
+                        <option value="2">2 ★ (Kurang)</option>
+                        <option value="1">1 ★ (Lemah)</option>
+                    </select>
+                </div>
+            `).join("");
+            calculateKeceriaanLive();
+        }
+
+        function calculateKeceriaanLive() {
+            let total = 0;
+            document.querySelectorAll(".keceriaan-score-select").forEach(sel => {
+                total += parseInt(sel.value, 10) || 0;
+            });
+            const pct = Math.round((total / 25) * 100);
+            document.getElementById("keceriaan-live-raw").textContent = total;
+            document.getElementById("keceriaan-live-pct").textContent = pct;
+            return { total, pct };
+        }
+
+        function saveKeceriaanRecord() {
+            const selVal = document.getElementById("keceriaan-kelas-select").value;
+            const kelas = selVal === "__MANUAL__"
+                ? document.getElementById("keceriaan-kelas-manual").value.trim().toUpperCase()
+                : selVal.trim();
+            const tarikh = document.getElementById("keceriaan-tarikh").value;
+            const penilai = document.getElementById("keceriaan-penilai").value.trim() || getSelectedKetuaName() || "Guru Bertugas";
+            const catatan = document.getElementById("keceriaan-catatan").value.trim();
+
+            if (!kelas) {
+                showToast("Sila pilih kelas yang dinilai terlebih dahulu.", "error");
+                return;
+            }
+
+            const { total, pct } = calculateKeceriaanLive();
+            const record = {
+                id: "KC-" + Date.now(),
+                week: appState.activeWeek,
+                kelas,
+                tarikh,
+                penilai,
+                rawScore: total,
+                percentage: pct,
+                catatan,
+                photo: tempPhotos.keceriaan || "",
+                createdAt: new Date().toISOString()
+            };
+
+            // Gantikan jika kelas sama sudah dinilai pada minggu ini, atau tambah baharu
+            const existingIdx = appState.records.keceriaan.findIndex(r => r.week === appState.activeWeek && r.kelas === kelas);
+            if (existingIdx > -1) {
+                appState.records.keceriaan[existingIdx] = record;
+            } else {
+                appState.records.keceriaan.unshift(record);
+            }
+
+            tempPhotos.keceriaan = "";
+            document.getElementById("keceriaan-photo-preview").classList.add("hidden");
+            saveStateToStorage();
+            updateAllUI();
+            showToast(`Markah keceriaan ${kelas} (${pct}%) berjaya disimpan.`, "success");
+        }
+
+        function resetKeceriaanForm() {
+            document.getElementById("keceriaan-kelas-select").value = "";
+            document.getElementById("keceriaan-kelas-manual").classList.add("hidden");
+            document.getElementById("keceriaan-catatan").value = "";
+            tempPhotos.keceriaan = "";
+            document.getElementById("keceriaan-photo-preview").classList.add("hidden");
+            renderKeceriaanCriteria();
+            showToast("Borang Keceriaan Kelas dikosongkan.", "info");
+        }
+
+        // 8. MODUL 3: PEMANTAUAN KESELAMATAN SEKOLAH (3K)
+        function renderKeselamatanZones() {
+            const container = document.getElementById("keselamatan-zones-list");
+            container.innerHTML = KESELAMATAN_ZONES.map(z => `
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+                    <p class="text-xs font-extrabold text-slate-800">${escapeHtml(z.name)}</p>
+                    <select data-zone-id="${z.id}" data-zone-name="${escapeHtml(z.name)}" class="keselamatan-zone-select w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-800">
+                        <option value="Selamat">✅ Selamat &amp; Terkawal</option>
+                        <option value="Perlu Perhatian">⚠️ Perlu Perhatian / Penyelenggaraan</option>
+                        <option value="Bahaya / Segera">🚨 Bahaya / Tindakan Segera</option>
+                    </select>
+                </div>
+            `).join("");
+        }
+
+        function saveKeselamatanRecord() {
+            const tarikh = document.getElementById("keselamatan-tarikh").value;
+            const pemeriksa = document.getElementById("keselamatan-pemeriksa").value.trim() || getSelectedKetuaName() || "Guru Bertugas";
+            const catatan = document.getElementById("keselamatan-catatan").value.trim();
+
+            const zones = [];
+            let issuesCount = 0;
+            const issueList = [];
+
+            document.querySelectorAll(".keselamatan-zone-select").forEach(sel => {
+                const name = sel.dataset.zoneName;
+                const status = sel.value;
+                zones.push({ name, status });
+                if (status !== "Selamat") {
+                    issuesCount++;
+                    issueList.push(`${name} (${status})`);
+                }
+            });
+
+            const record = {
+                id: "KS-" + Date.now(),
+                week: appState.activeWeek,
+                tarikh,
+                pemeriksa,
+                zones,
+                issuesCount,
+                issuesSummary: issueList.length ? issueList.join("; ") : "Semua 6 kawasan selamat",
+                catatan,
+                photo: tempPhotos.keselamatan || "",
+                createdAt: new Date().toISOString()
+            };
+
+            appState.records.keselamatan.unshift(record);
+            tempPhotos.keselamatan = "";
+            document.getElementById("keselamatan-photo-preview").classList.add("hidden");
+            saveStateToStorage();
+            updateAllUI();
+            showToast("Laporan Pemeriksaan Keselamatan 3K berjaya disimpan.", "success");
+        }
+
+        function resetKeselamatanForm() {
+            document.getElementById("keselamatan-catatan").value = "";
+            tempPhotos.keselamatan = "";
+            document.getElementById("keselamatan-photo-preview").classList.add("hidden");
+            renderKeselamatanZones();
+            showToast("Borang Keselamatan 3K dikosongkan.", "info");
+        }
+
+        // 9. MODUL 4: PEMANTAUAN PROGRAM RMT
+        function renderRmtCriteria() {
+            const container = document.getElementById("rmt-criteria-list");
+            container.innerHTML = RMT_CRITERIA.map(r => `
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between gap-2">
+                    <span class="text-xs font-bold text-slate-800">${escapeHtml(r.label)}</span>
+                    <select data-rmt-crit="${escapeHtml(r.label)}" class="rmt-crit-select rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-amber-900 shrink-0">
+                        <option value="Baik">Baik</option>
+                        <option value="Memuaskan">Memuaskan</option>
+                        <option value="Perlu Teguran">Perlu Teguran</option>
+                    </select>
+                </div>
+            `).join("");
+        }
+
+        function setRmtMenu(menuText) {
+            document.getElementById("rmt-menu").value = menuText;
+        }
+
+        function calculateRmtLive() {
+            const layak = Math.max(0, parseInt(document.getElementById("rmt-layak").value, 10) || 0);
+            const hadir = Math.max(0, parseInt(document.getElementById("rmt-hadir").value, 10) || 0);
+            const pct = layak > 0 ? Math.min(100, Math.round((hadir / layak) * 100)) : 0;
+            const baki = Math.max(0, layak - hadir);
+            document.getElementById("rmt-live-summary").textContent = `Kehadiran: ${pct}% • Baki Pek: ${baki}`;
+            return { layak, hadir, pct, baki };
+        }
+
+        function saveRmtRecord() {
+            const tarikh = document.getElementById("rmt-tarikh").value;
+            const waktu = document.getElementById("rmt-waktu").value;
+            const pemantau = document.getElementById("rmt-pemantau").value.trim() || getSelectedKetuaName() || "Guru Bertugas";
+            const menu = document.getElementById("rmt-menu").value.trim();
+            const pematuhan = document.getElementById("rmt-pematuhan").value;
+            const ganti = document.getElementById("rmt-ganti").value.trim();
+            const catatan = document.getElementById("rmt-catatan").value.trim();
+            const { layak, hadir, pct, baki } = calculateRmtLive();
+
+            if (!menu) {
+                showToast("Sila masukkan menu hidangan RMT hari ini.", "error");
+                return;
+            }
+
+            const criteria = [];
+            document.querySelectorAll(".rmt-crit-select").forEach(sel => {
+                criteria.push({ label: sel.dataset.rmtCrit, status: sel.value });
+            });
+
+            const record = {
+                id: "RMT-" + Date.now(),
+                week: appState.activeWeek,
+                tarikh,
+                waktu,
+                pemantau,
+                layak,
+                hadir,
+                pct,
+                baki,
+                ganti,
+                menu,
+                pematuhan,
+                criteria,
+                catatan,
+                photo: tempPhotos.rmt || "",
+                createdAt: new Date().toISOString()
+            };
+
+            appState.records.rmt.unshift(record);
+            tempPhotos.rmt = "";
+            document.getElementById("rmt-photo-preview").classList.add("hidden");
+            saveStateToStorage();
+            updateAllUI();
+            showToast(`Laporan Program RMT (${pct}% kehadiran) berjaya disimpan.`, "success");
+        }
+
+        function resetRmtForm() {
+            document.getElementById("rmt-menu").value = "";
+            document.getElementById("rmt-ganti").value = "";
+            document.getElementById("rmt-catatan").value = "";
+            tempPhotos.rmt = "";
+            document.getElementById("rmt-photo-preview").classList.add("hidden");
+            renderRmtCriteria();
+            calculateRmtLive();
+            showToast("Borang Program RMT dikosongkan.", "info");
+        }
+
+        // 10. MUAT NAIK & PEMAMPATAN GAMBAR BUKTI
+        function handleImageUpload(event, moduleKey) {
+            const file = event.target.files[0];
+            if (!file) return;
+            compressImage(file, 720, 0.72, (dataUrl) => {
+                tempPhotos[moduleKey] = dataUrl;
+                const preview = document.getElementById(`${moduleKey}-photo-preview`);
+                preview.innerHTML = `
+                    <div class="relative inline-block">
+                        <img src="${dataUrl}" alt="Pratonton Bukti" class="h-24 rounded-xl border border-slate-300 object-cover">
+                        <button type="button" onclick="removeTempPhoto('${moduleKey}')" class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-rose-600 text-white text-xs font-bold shadow">&times;</button>
+                    </div>
+                `;
+                preview.classList.remove("hidden");
+                showToast("Gambar bukti sedia dilampirkan.", "success");
+            });
+        }
+
+        function removeTempPhoto(moduleKey) {
+            tempPhotos[moduleKey] = "";
+            const preview = document.getElementById(`${moduleKey}-photo-preview`);
+            preview.innerHTML = "";
+            preview.classList.add("hidden");
+        }
+
+        function compressImage(file, maxWidth, quality, callback) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > maxWidth) {
+                        h = Math.round((h * maxWidth) / w);
+                        w = maxWidth;
+                    }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, w, h);
+                    callback(canvas.toDataURL("image/jpeg", quality));
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 11. KEMAS KINI PAPARAN & STATISTIK MINGGU AKTIF
+        function updateAllUI() {
+            const w = appState.activeWeek;
+            const harianWeek = appState.records.harian.filter(r => r.week === w);
+            const keceriaanWeek = appState.records.keceriaan.filter(r => r.week === w);
+            const keselamatanWeek = appState.records.keselamatan.filter(r => r.week === w);
+            const rmtWeek = appState.records.rmt.filter(r => r.week === w);
+
+            const totalAll = appState.records.harian.length + appState.records.keceriaan.length + appState.records.keselamatan.length + appState.records.rmt.length;
+            document.getElementById("header-record-count").textContent = totalAll;
+
+            // Ketua Bertugas pada bar atas
+            const activeKetua = getSelectedKetuaName() || (harianWeek[0] && harianWeek[0].ketua) || "Belum dipilih";
+            document.getElementById("bar-ketua-name").textContent = activeKetua;
+
+            // Pengiraan Johan Keceriaan Mingguan Automatik
+            const sortedKeceriaan = [...keceriaanWeek].sort((a, b) => b.percentage - a.percentage);
+            const johanNameEl = document.getElementById("johan-kelas-name");
+            const johanDetailEl = document.getElementById("johan-kelas-detail");
+            const johanScoreEl = document.getElementById("johan-kelas-score");
+
+            if (sortedKeceriaan.length > 0) {
+                const best = sortedKeceriaan[0];
+                johanNameEl.textContent = best.kelas;
+                johanDetailEl.textContent = `Markah ${best.rawScore}/25 • Dinilai oleh ${best.penilai} (${best.tarikh})`;
+                johanScoreEl.textContent = `${best.percentage}%`;
+            } else {
+                johanNameEl.textContent = "Belum Dinilai";
+                johanDetailEl.textContent = "Sila masukkan penilaian kelas di bawah untuk menentukan pemenang mingguan.";
+                johanScoreEl.textContent = "0%";
+            }
+
+            // Senarai Rekod Tab 1 (Harian)
+            const harianList = document.getElementById("harian-records-list");
+            harianList.innerHTML = harianWeek.length ? harianWeek.map(r => `
+                <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex items-start justify-between gap-3">
+                    <div class="space-y-1 text-xs">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-extrabold text-skGreen-800 bg-skGreen-100 px-2 py-0.5 rounded">${escapeHtml(r.hari)} (${escapeHtml(r.tarikh)})</span>
+                            <span class="font-bold text-slate-800">Ketua: ${escapeHtml(r.ketua)}</span>
+                        </div>
+                        <p class="text-slate-600"><strong>Ucapan:</strong> ${escapeHtml(r.ucapan || "-")}</p>
+                        <p class="text-slate-600"><strong>Disiplin:</strong> ${escapeHtml(r.disiplin || "-")} • <strong>Kes Kesihatan:</strong> ${r.kesihatan ? r.kesihatan.length : 0} murid</p>
+                    </div>
+                    <button type="button" onclick="deleteRecord('harian', '${r.id}')" class="text-xs font-bold text-rose-600 hover:bg-rose-100 px-2.5 py-1 rounded-lg shrink-0">Padam</button>
+                </div>
+            `).join("") : `<p class="text-xs text-slate-400 italic">Tiada laporan harian disimpan untuk Minggu ${w}.</p>`;
+
+            // Senarai Rekod Tab 2 (Keceriaan)
+            const keceriaanList = document.getElementById("keceriaan-records-list");
+            keceriaanList.innerHTML = sortedKeceriaan.length ? sortedKeceriaan.map((r, idx) => `
+                <div class="p-3.5 rounded-xl border ${idx === 0 ? "border-amber-300 bg-amber-50/70" : "border-slate-200 bg-slate-50"} flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 text-xs">
+                        <span class="w-7 h-7 rounded-lg ${idx === 0 ? "bg-amber-400 text-slate-950" : "bg-slate-200 text-slate-700"} font-black flex items-center justify-center shrink-0">#${idx + 1}</span>
+                        <div>
+                            <p class="font-extrabold text-slate-900">${escapeHtml(r.kelas)} <span class="text-emerald-700">(${r.percentage}% • ${r.rawScore}/25)</span></p>
+                            <p class="text-slate-500">Penilai: ${escapeHtml(r.penilai)} • ${escapeHtml(r.catatan || "Tiada ulasan tambahan")}</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="deleteRecord('keceriaan', '${r.id}')" class="text-xs font-bold text-rose-600 hover:bg-rose-100 px-2.5 py-1 rounded-lg shrink-0">Padam</button>
+                </div>
+            `).join("") : `<p class="text-xs text-slate-400 italic">Tiada penilaian kelas direkodkan untuk Minggu ${w}.</p>`;
+
+            // Senarai Rekod Tab 3 (Keselamatan)
+            const keselamatanList = document.getElementById("keselamatan-records-list");
+            keselamatanList.innerHTML = keselamatanWeek.length ? keselamatanWeek.map(r => `
+                <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex items-start justify-between gap-3 text-xs">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="font-extrabold text-slate-800">${escapeHtml(r.tarikh)}</span>
+                            <span class="px-2 py-0.5 rounded font-bold ${r.issuesCount > 0 ? "bg-rose-100 text-rose-800" : "bg-emerald-100 text-emerald-800"}">
+                                ${r.issuesCount > 0 ? r.issuesCount + " Kawasan Perlu Perhatian" : "Semua 6 Kawasan Selamat"}
+                            </span>
+                        </div>
+                        <p class="text-slate-600"><strong>Pemeriksa:</strong> ${escapeHtml(r.pemeriksa)} • <strong>Status:</strong> ${escapeHtml(r.issuesSummary)}</p>
+                        ${r.catatan ? `<p class="text-slate-600"><strong>Tindakan:</strong> ${escapeHtml(r.catatan)}</p>` : ""}
+                    </div>
+                    <button type="button" onclick="deleteRecord('keselamatan', '${r.id}')" class="text-xs font-bold text-rose-600 hover:bg-rose-100 px-2.5 py-1 rounded-lg shrink-0">Padam</button>
+                </div>
+            `).join("") : `<p class="text-xs text-slate-400 italic">Tiada rekod pemeriksaan keselamatan untuk Minggu ${w}.</p>`;
+
+            // Senarai Rekod Tab 4 (RMT)
+            const rmtList = document.getElementById("rmt-records-list");
+            rmtList.innerHTML = rmtWeek.length ? rmtWeek.map(r => `
+                <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex items-start justify-between gap-3 text-xs">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-extrabold text-amber-900 bg-amber-100 px-2 py-0.5 rounded">${escapeHtml(r.tarikh)}</span>
+                            <span class="font-bold text-slate-800">${escapeHtml(r.menu)}</span>
+                            <span class="font-extrabold text-emerald-700">(${r.hadir}/${r.layak} Hadir • ${r.pct}%)</span>
+                        </div>
+                        <p class="text-slate-600"><strong>Status KPM:</strong> ${escapeHtml(r.pematuhan)} • <strong>Pemantau:</strong> ${escapeHtml(r.pemantau)}</p>
+                        ${r.catatan ? `<p class="text-slate-600"><strong>Ulasan:</strong> ${escapeHtml(r.catatan)}</p>` : ""}
+                    </div>
+                    <button type="button" onclick="deleteRecord('rmt', '${r.id}')" class="text-xs font-bold text-rose-600 hover:bg-rose-100 px-2.5 py-1 rounded-lg shrink-0">Padam</button>
+                </div>
+            `).join("") : `<p class="text-xs text-slate-400 italic">Tiada rekod pemantauan RMT untuk Minggu ${w}.</p>`;
+
+            // Statistik Tab 5 (Arkib & Drive)
+            const avgKeceriaan = keceriaanWeek.length
+                ? Math.round(keceriaanWeek.reduce((acc, item) => acc + item.percentage, 0) / keceriaanWeek.length)
+                : 0;
+            const totalSafetyIssues = keselamatanWeek.reduce((acc, item) => acc + (item.issuesCount || 0), 0);
+            const avgRmt = rmtWeek.length
+                ? Math.round(rmtWeek.reduce((acc, item) => acc + item.pct, 0) / rmtWeek.length)
+                : 0;
+
+            document.getElementById("stat-harian-count").textContent = `${harianWeek.length} Hari`;
+            document.getElementById("stat-keceriaan-avg").textContent = `${avgKeceriaan}%`;
+            document.getElementById("stat-keselamatan-issues").textContent = `${totalSafetyIssues} Kes`;
+            document.getElementById("stat-rmt-avg").textContent = `${avgRmt}%`;
+
+            // Status Pengesahan Pentadbir Minggu Ini
+            const isVerified = !!appState.verifiedWeeks[w];
+            const verBadge = document.getElementById("week-verification-badge");
+            const btnVerify = document.getElementById("btn-verify-week");
+            if (isVerified) {
+                verBadge.textContent = "✓ Disahkan Oleh Pentadbir SKSC";
+                verBadge.className = "text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300";
+                if (btnVerify) btnVerify.textContent = "Batal Pengesahan Minggu Ini";
+            } else {
+                verBadge.textContent = "Belum Disahkan Pentadbir";
+                verBadge.className = "text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600";
+                if (btnVerify) btnVerify.textContent = "✓ Sahkan Laporan Minggu Ini";
+            }
+
+            // Pratonton Ringkasan Minggu Aktif
+            document.getElementById("week-summary-preview").innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <p class="font-extrabold text-skGreen-800 uppercase mb-1">1. Ringkasan Harian &amp; Disiplin</p>
+                        <p><strong>Bilangan Hari Direkod:</strong> ${harianWeek.length} hari</p>
+                        <p><strong>Ketua Bertugas:</strong> ${escapeHtml(activeKetua)}</p>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <p class="font-extrabold text-emerald-800 uppercase mb-1">2. Ringkasan Keceriaan Kelas</p>
+                        <p><strong>Johan Mingguan:</strong> ${sortedKeceriaan[0] ? escapeHtml(sortedKeceriaan[0].kelas) + " (" + sortedKeceriaan[0].percentage + "%)" : "Belum dinilai"}</p>
+                        <p><strong>Bilangan Kelas Dinilai:</strong> ${keceriaanWeek.length} / ${appState.classes.length} kelas</p>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <p class="font-extrabold text-rose-800 uppercase mb-1">3. Ringkasan Keselamatan 3K</p>
+                        <p><strong>Bilangan Pemeriksaan:</strong> ${keselamatanWeek.length} kali</p>
+                        <p><strong>Jumlah Kawasan Perlu Tindakan:</strong> ${totalSafetyIssues} isu</p>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <p class="font-extrabold text-amber-800 uppercase mb-1">4. Ringkasan Program RMT</p>
+                        <p><strong>Bilangan Sesi Dipantau:</strong> ${rmtWeek.length} hari</p>
+                        <p><strong>Purata Kehadiran RMT:</strong> ${avgRmt}%</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function deleteRecord(category, id) {
+            appState.records[category] = appState.records[category].filter(item => item.id !== id);
+            saveStateToStorage();
+            updateAllUI();
+            showToast("Rekod berjaya dipadam.", "info");
+        }
+
+        function toggleWeekVerification() {
+            const w = appState.activeWeek;
+            appState.verifiedWeeks[w] = !appState.verifiedWeeks[w];
+            saveStateToStorage();
+            updateAllUI();
+            showToast(appState.verifiedWeeks[w] ? `Laporan Minggu ${w} telah disahkan pentadbir.` : `Pengesahan Minggu ${w} dibatalkan.`, "success");
+        }
+
+        function clearCurrentWeekData() {
+            const w = appState.activeWeek;
+            appState.records.harian = appState.records.harian.filter(r => r.week !== w);
+            appState.records.keceriaan = appState.records.keceriaan.filter(r => r.week !== w);
+            appState.records.keselamatan = appState.records.keselamatan.filter(r => r.week !== w);
+            appState.records.rmt = appState.records.rmt.filter(r => r.week !== w);
+            delete appState.verifiedWeeks[w];
+            saveStateToStorage();
+            updateAllUI();
+            showToast(`Semua rekod bagi Minggu ${w} telah dipadam.`, "info");
+        }
+
+        // 12. INTEGRASI GOOGLE DRIVE, GOOGLE SHEETS, CSV & CETAKAN PDF RASMI
+        function openOfficialSheetInFolder() {
+            const targetUrl = (appState.sheetUrl && appState.sheetUrl.startsWith("http")) ? appState.sheetUrl : OFFICIAL_SHEET_URL;
+            window.open(targetUrl, "_blank", "noopener,noreferrer");
+        }
+
+        function openDriveScriptModal() {
+            document.getElementById("setting-apps-script-url").value = appState.appsScriptUrl || "";
+            document.getElementById("setting-sheet-url").value = appState.sheetUrl || "";
+            document.getElementById("modal-drive-script").classList.remove("hidden");
+        }
+
+        function saveDriveSettings() {
+            appState.appsScriptUrl = document.getElementById("setting-apps-script-url").value.trim();
+            appState.sheetUrl = document.getElementById("setting-sheet-url").value.trim();
+            saveStateToStorage();
+            closeModal("modal-drive-script");
+            showToast("Tetapan Google Drive & Google Sheet berjaya disimpan.", "success");
+        }
+
+        function copyAppsScript() {
+            const codeText = document.getElementById("google-apps-script-code").textContent;
+            const tempArea = document.createElement("textarea");
+            tempArea.value = codeText;
+            document.body.appendChild(tempArea);
+            tempArea.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempArea);
+            showToast("Kod Google Apps Script berjaya disalin! Tampal di editor Apps Script.", "success");
+        }
+
+        async function sendWeekToGoogleDrive() {
+            const w = appState.activeWeek;
+            const harianWeek = appState.records.harian.filter(r => r.week === w);
+            const keceriaanWeek = appState.records.keceriaan.filter(r => r.week === w);
+            const keselamatanWeek = appState.records.keselamatan.filter(r => r.week === w);
+            const rmtWeek = appState.records.rmt.filter(r => r.week === w);
+
+            if (!harianWeek.length && !keceriaanWeek.length && !keselamatanWeek.length && !rmtWeek.length) {
+                showToast(`Tiada rekod disimpan bagi Minggu ${w} untuk dihantar.`, "error");
+                return;
+            }
+
+            if (!appState.appsScriptUrl) {
+                showToast("Sila tetapkan URL Web App Google Apps Script (Mod Admin > Jana Sheet & Sambung Drive) atau muat turun fail CSV/JSON untuk dimuat naik ke Folder Drive.", "info");
+                window.open(OFFICIAL_DRIVE_FOLDER_URL, "_blank", "noopener,noreferrer");
+                return;
+            }
+
+            const sortedKeceriaan = [...keceriaanWeek].sort((a, b) => b.percentage - a.percentage);
+            const avgKeceriaan = keceriaanWeek.length ? Math.round(keceriaanWeek.reduce((a, b) => a + b.percentage, 0) / keceriaanWeek.length) : 0;
+            const totalSafetyIssues = keselamatanWeek.reduce((a, b) => a + (b.issuesCount || 0), 0);
+            const avgRmt = rmtWeek.length ? Math.round(rmtWeek.reduce((a, b) => a + b.pct, 0) / rmtWeek.length) : 0;
+
+            const photos = [];
+            keceriaanWeek.forEach(r => { if (r.photo) photos.push({ category: "Keceriaan_" + r.kelas.replace(/\s+/g, "_"), dataUrl: r.photo }); });
+            keselamatanWeek.forEach(r => { if (r.photo) photos.push({ category: "Keselamatan_3K", dataUrl: r.photo }); });
+            rmtWeek.forEach(r => { if (r.photo) photos.push({ category: "Program_RMT", dataUrl: r.photo }); });
+
+            const payloadData = {
+                schoolName: appState.schoolName,
+                folderId: OFFICIAL_DRIVE_FOLDER_ID,
+                week: w,
+                dailyCount: harianWeek.length,
+                avgKeceriaan,
+                bestClass: sortedKeceriaan[0] ? `${sortedKeceriaan[0].kelas} (${sortedKeceriaan[0].percentage}%)` : "-",
+                safetyIssuesCount: totalSafetyIssues,
+                avgRMT: avgRmt,
+                rmtCount: rmtWeek.length,
+                photos,
+                payload: {
+                    harian: harianWeek,
+                    keceriaan: keceriaanWeek.map(({ photo, ...rest }) => rest),
+                    keselamatan: keselamatanWeek.map(({ photo, ...rest }) => rest),
+                    rmt: rmtWeek.map(({ photo, ...rest }) => rest)
+                }
+            };
+
+            try {
+                showToast("Sedang menghantar laporan & foto ke Google Drive SK Seri Chantek...", "info");
+                await fetch(appState.appsScriptUrl, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify(payloadData)
+                });
+                showToast(`Laporan Minggu ${w} berjaya dihantar ke Folder Google Drive & Google Sheet SK Seri Chantek!`, "success");
+            } catch (err) {
+                showToast("Ralat rangkaian semasa menghantar ke Drive: " + err.message, "error");
+            }
+        }
+
+        function exportWeekToCSV() {
+            const w = appState.activeWeek;
+            const harianWeek = appState.records.harian.filter(r => r.week === w);
+            const keceriaanWeek = appState.records.keceriaan.filter(r => r.week === w);
+            const keselamatanWeek = appState.records.keselamatan.filter(r => r.week === w);
+            const rmtWeek = appState.records.rmt.filter(r => r.week === w);
+
+            const rows = [
+                ["LAPORAN GURU BERTUGAS MINGGUAN - " + appState.schoolName],
+                ["Minggu", "Modul", "Tarikh", "Perkara / Kelas / Hari", "Status / Markah", "Pegawai / Ketua", "Catatan Terperinci"]
+            ];
+
+            harianWeek.forEach(r => {
+                rows.push([`Minggu ${w}`, "Laporan Harian", r.tarikh, r.hari, `Kes Kesihatan: ${r.kesihatan?.length || 0}`, r.ketua, `Ucapan: ${r.ucapan} | Disiplin: ${r.disiplin}`]);
+            });
+            keceriaanWeek.forEach(r => {
+                rows.push([`Minggu ${w}`, "Keceriaan Kelas", r.tarikh, r.kelas, `${r.percentage}% (${r.rawScore}/25)`, r.penilai, r.catatan]);
+            });
+            keselamatanWeek.forEach(r => {
+                rows.push([`Minggu ${w}`, "Keselamatan 3K", r.tarikh, "6 Kawasan Sekolah", r.issuesSummary, r.pemeriksa, r.catatan]);
+            });
+            rmtWeek.forEach(r => {
+                rows.push([`Minggu ${w}`, "Program RMT", r.tarikh, r.menu, `${r.hadir}/${r.layak} (${r.pct}%) - ${r.pematuhan}`, r.pemantau, r.catatan]);
+            });
+
+            const csvContent = "\uFEFF" + rows.map(row => row.map(cell => `"${String(cell || "").replace(/"/g, '""')}"`).join(",")).join("\n");
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `eLaporan_SK_Seri_Chantek_Minggu_${w}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast(`Fail CSV Minggu ${w} berjaya dimuat turun.`, "success");
+        }
+
+        function exportBackupJSON() {
+            const dataStr = JSON.stringify(appState, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `Sandaran_eLaporan_SK_Seri_Chantek_M${appState.activeWeek}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("Fail sandaran JSON berjaya dimuat turun.", "success");
+        }
+
+        function printOfficialWeeklyReport() {
+            const w = appState.activeWeek;
+            const harianWeek = appState.records.harian.filter(r => r.week === w);
+            const keceriaanWeek = [...appState.records.keceriaan.filter(r => r.week === w)].sort((a, b) => b.percentage - a.percentage);
+            const keselamatanWeek = appState.records.keselamatan.filter(r => r.week === w);
+            const rmtWeek = appState.records.rmt.filter(r => r.week === w);
+
+            const ketuaName = (harianWeek[0] && harianWeek[0].ketua) || getSelectedKetuaName() || "................................................";
+            const ahliNames = (harianWeek[0] && harianWeek[0].ahli) || document.getElementById("harian-ahli").value.trim() || "-";
+            const isVerified = !!appState.verifiedWeeks[w];
+
+            const printContainer = document.getElementById("print-report-container");
+            printContainer.innerHTML = `
+                <div style="border-bottom: 3px double #0f172a; padding-bottom: 10px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <p style="font-size: 9pt; font-weight: 700; letter-spacing: 0.5px; margin: 0;">KEMENTERIAN PENDIDIKAN MALAYSIA</p>
+                        <h1 style="font-size: 14pt; font-weight: 800; margin: 2px 0;">${escapeHtml(appState.schoolName)}</h1>
+                        <p style="font-size: 9.5pt; margin: 0;">${escapeHtml(appState.schoolCode)} • Cogan Kata: <strong>${escapeHtml(appState.schoolMotto)}</strong></p>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="border: 1.5px solid #0f172a; padding: 4px 10px; font-weight: 800; font-size: 10pt;">LAPORAN MINGGU ${w}</span>
+                        <p style="font-size: 8.5pt; margin-top: 6px;">Status: <strong>${isVerified ? "DISAHKAN PENTADBIR" : "DRAF / SEMAKAN"}</strong></p>
+                    </div>
+                </div>
+
+                <h2 style="text-align: center; font-size: 11.5pt; font-weight: 800; text-decoration: underline; margin-bottom: 10px;">
+                    LAPORAN GURU BERTUGAS MINGGUAN (3K, KESELAMATAN &amp; PROGRAM RMT)
+                </h2>
+
+                <table class="print-table">
+                    <tr>
+                        <th style="width: 24%;">Ketua Guru Bertugas</th>
+                        <td>${escapeHtml(ketuaName)}</td>
+                    </tr>
+                    <tr>
+                        <th>Ahli Guru Bertugas</th>
+                        <td>${escapeHtml(ahliNames)}</td>
+                    </tr>
+                </table>
+
+                <div class="print-section">
+                    <h3 style="font-size: 10pt; font-weight: 800; margin: 10px 0 4px;">BAHAGIAN A: LAPORAN HARIAN, PERHIMPUNAN &amp; KESIHATAN MURID</h3>
+                    <table class="print-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">Hari / Tarikh</th>
+                                <th style="width: 32%;">Ucapan Pentadbir &amp; Perhimpunan</th>
+                                <th style="width: 30%;">Laporan Disiplin &amp; Sahsiah</th>
+                                <th style="width: 23%;">Rekod Kesihatan Murid</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${harianWeek.length ? harianWeek.map(r => `
+                                <tr>
+                                    <td><strong>${escapeHtml(r.hari)}</strong><br>${escapeHtml(r.tarikh)}</td>
+                                    <td>${escapeHtml(r.ucapan || "-")}</td>
+                                    <td>${escapeHtml(r.disiplin || "-")}</td>
+                                    <td>${r.kesihatan && r.kesihatan.length ? r.kesihatan.map(k => `• ${escapeHtml(k.nama)} (${escapeHtml(k.kelas)}): ${escapeHtml(k.masalah)}`).join("<br>") : "Tiada kes"}</td>
+                                </tr>
+                            `).join("") : `<tr><td colspan="4" style="text-align:center;">Tiada rekod laporan harian bagi minggu ini.</td></tr>`}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="print-section">
+                    <h3 style="font-size: 10pt; font-weight: 800; margin: 10px 0 4px;">BAHAGIAN B: PEMANTAUAN KEBERSIHAN &amp; KECERIAAN KELAS (3K)</h3>
+                    <p style="font-size: 9.5pt; margin: 0 0 4px;"><strong>Johan Keceriaan Kelas Mingguan:</strong> ${keceriaanWeek[0] ? `${escapeHtml(keceriaanWeek[0].kelas)} (${keceriaanWeek[0].percentage}% - ${keceriaanWeek[0].rawScore}/25)` : "Belum Dinilai"}</p>
+                    <table class="print-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 8%;">Ked.</th>
+                                <th style="width: 20%;">Nama Kelas</th>
+                                <th style="width: 18%;">Markah / %</th>
+                                <th style="width: 24%;">Guru Penilai</th>
+                                <th style="width: 30%;">Ulasan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${keceriaanWeek.length ? keceriaanWeek.map((r, i) => `
+                                <tr>
+                                    <td>${i + 1}</td>
+                                    <td><strong>${escapeHtml(r.kelas)}</strong></td>
+                                    <td>${r.rawScore}/25 (${r.percentage}%)</td>
+                                    <td>${escapeHtml(r.penilai)}</td>
+                                    <td>${escapeHtml(r.catatan || "-")}</td>
+                                </tr>
+                            `).join("") : `<tr><td colspan="5" style="text-align:center;">Tiada penilaian keceriaan kelas bagi minggu ini.</td></tr>`}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="print-section">
+                    <h3 style="font-size: 10pt; font-weight: 800; margin: 10px 0 4px;">BAHAGIAN C: PEMANTAUAN KESELAMATAN FIZIKAL SEKOLAH (3K)</h3>
+                    <table class="print-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">Tarikh</th>
+                                <th style="width: 23%;">Pegawai Pemeriksa</th>
+                                <th style="width: 32%;">Status 6 Kawasan Utama</th>
+                                <th style="width: 30%;">Laporan Kerosakan / Tindakan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${keselamatanWeek.length ? keselamatanWeek.map(r => `
+                                <tr>
+                                    <td>${escapeHtml(r.tarikh)}</td>
+                                    <td>${escapeHtml(r.pemeriksa)}</td>
+                                    <td>${escapeHtml(r.issuesSummary)}</td>
+                                    <td>${escapeHtml(r.catatan || "-")}</td>
+                                </tr>
+                            `).join("") : `<tr><td colspan="4" style="text-align:center;">Tiada rekod pemeriksaan keselamatan bagi minggu ini.</td></tr>`}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="print-section">
+                    <h3 style="font-size: 10pt; font-weight: 800; margin: 10px 0 4px;">BAHAGIAN D: PEMANTAUAN PROGRAM RANCANGAN MAKANAN TAMBAHAN (RMT)</h3>
+                    <table class="print-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 14%;">Tarikh</th>
+                                <th style="width: 24%;">Menu &amp; Pematuhan KPM</th>
+                                <th style="width: 18%;">Kehadiran RMT</th>
+                                <th style="width: 20%;">Guru Pemantau</th>
+                                <th style="width: 24%;">Ulasan Kualiti</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rmtWeek.length ? rmtWeek.map(r => `
+                                <tr>
+                                    <td>${escapeHtml(r.tarikh)}</td>
+                                    <td><strong>${escapeHtml(r.menu)}</strong><br>(${escapeHtml(r.pematuhan)})</td>
+                                    <td>${r.hadir}/${r.layak} (${r.pct}%)</td>
+                                    <td>${escapeHtml(r.pemantau)}</td>
+                                    <td>${escapeHtml(r.catatan || "-")}</td>
+                                </tr>
+                            `).join("") : `<tr><td colspan="5" style="text-align:center;">Tiada rekod pemantauan RMT bagi minggu ini.</td></tr>`}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Ruangan Tandatangan Rasmi 3 Penjuru -->
+                <div class="print-section" style="margin-top: 26px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; font-size: 9pt;">
+                    <div>
+                        <p style="margin-bottom: 42px;">Disediakan oleh,</p>
+                        <p style="border-top: 1px solid #0f172a; padding-top: 4px; font-weight: 700;">${escapeHtml(ketuaName)}</p>
+                        <p>Ketua Guru Bertugas Minggu ${w}</p>
+                    </div>
+                    <div>
+                        <p style="margin-bottom: 42px;">Disemak oleh,</p>
+                        <p style="border-top: 1px solid #0f172a; padding-top: 4px; font-weight: 700;">Penolong Kanan HEM / Penyelaras</p>
+                        <p>${escapeHtml(appState.schoolName)}</p>
+                    </div>
+                    <div>
+                        <p style="margin-bottom: 42px;">Disahkan oleh,</p>
+                        <p style="border-top: 1px solid #0f172a; padding-top: 4px; font-weight: 700;">Guru Besar</p>
+                        <p>${escapeHtml(appState.schoolName)}</p>
+                    </div>
+                </div>
+            `;
+
+            window.print();
+        }
+
+        // 13. UTILITI MODAL, TOAST & KESELAMATAN TEKS
+        function closeModal(modalId) {
+            const el = document.getElementById(modalId);
+            if (el) el.classList.add("hidden");
+        }
+
+        function showToast(message, type = "info") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            const colors = {
+                success: "bg-skGreen-800 text-white border-skGold-400",
+                error: "bg-rose-700 text-white border-rose-300",
+                info: "bg-slate-900 text-white border-slate-600"
+            };
+            toast.className = `animate-toast px-4 py-3 rounded-xl shadow-lg border-l-4 text-xs font-bold ${colors[type] || colors.info}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = "0";
+                toast.style.transition = "opacity 0.25s ease";
+                setTimeout(() => toast.remove(), 260);
+            }, 3400);
+        }
+
+        function escapeHtml(str) {
+            return String(str || "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+    </script>
+</body>
+</html>
